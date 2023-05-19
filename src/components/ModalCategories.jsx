@@ -1,19 +1,121 @@
 import * as React from "react";
 import Modal from "@mui/material/Modal";
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Alert, Button, FormControl, InputLabel, MenuItem, Select, TextField, CircularProgress } from "@mui/material";
 import styles from "@/styles/Modal.module.css";
 import { useState } from "react";
+// amplify
+import { Auth, API, graphqlOperation, Storage } from 'aws-amplify'
+import { createADCategory } from '@/graphql/mutations'
+
 
 export default function ModalCategories({ open, close }) {
-  const [brand, setBrand] = useState('');
-  const [product, setProduct] = useState('');
+  const [name, setName] = useState("");
+  const [file, setFile] = useState("");
+  const [abbr, setAbbr] = useState("");
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleBrand = (event) => {
-    setBrand(event.target.value);
-  };
-  const handleProduct = (event) => {
-    setProduct(event.target.value);
-  };
+
+
+
+  const onHandleRegister = async () => {
+    console.log("Nombre: ", name)
+    console.log("Imagen: ", file)
+    console.log("Abrr: ", abbr)
+
+    if (name.trim() === "") return alert("name vacio")
+    if (file === "") return alert("file vacio")
+    if (abbr.trim() === "") return alert("abbr vacio")
+    setIsLoading(true)
+    try {
+      // usuario logeado
+      const { username } = await Auth.currentAuthenticatedUser();
+      // obtener datos de almacenamiento 
+      const bucketName = Storage._config.AWSS3.bucket;
+      const region = Storage._config.AWSS3.region;
+      // subir imagen 
+      const key = await uploadImage(name, file)
+      // obtener url
+      const url = `https:${bucketName}.s3.${region}.amazonaws.com/public/${key}`
+      const params = {
+        input: {
+          name: name.trim(),
+          abreviation: abbr.trim(),
+          path: key,
+          image: url,
+          createdBy: username
+        }
+      }
+
+      //crear categoria
+      const result = await API.graphql(graphqlOperation(createADCategory, params));
+      console.log("Result: ", result)
+      onHandleClose();
+      alert("Categoria Subida")
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+    setIsLoading(false)
+  }
+
+  const uploadImage = async (name, file) => {
+    const { key } = await Storage.put(`app/images/categories/${name}.image`, file, {
+      level: "public",
+      contentType: file.type,
+      progressCallback(progress) {
+        console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
+      },
+
+    })
+    return key
+  }
+
+  // searchImage function que sirve para buscar una imagen en Storage 
+  // path ruta carpeta /app/images
+  // ruta de imagen deseada /app/images/image.png
+  const searchImage = async (path, imageKey) => {
+    try {
+      const objects = await Storage.list(path, { pageSize: 20 });
+      console.log(objects)
+      const imageObject = objects.find((object) => object.key === imageKey);
+
+      if (imageObject) {
+        const { bucket, region, key } = imageObject;
+        const url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+        console.log('URL de la imagen:', url);
+        return url;
+      } else {
+        console.error('No se encontró la imagen en el bucket de S3');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error al obtener la URL de la imagen:', error);
+      return null;
+    }
+  }
+
+  const onHandleClose = () => {
+    clear();
+    close();
+  }
+
+  const clear = () => {
+    setName("");
+    setFile("");
+    setAbbr("");
+    setIsLoading(false)
+  }
+
+  const onHandleFileChange = (data) => {
+    const file = data.target.files[0];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+    if (file && allowedTypes.includes(file.type)) {
+      setFile(file)
+      console.log(file.name)
+    } else {
+      alert("El archivo tiene que ser una imagen");
+    }
+  }
 
   return (
     <div>
@@ -27,64 +129,52 @@ export default function ModalCategories({ open, close }) {
           <div className={styles.content}>
             <div className={styles.top}>
               <div className={styles.title}>
-                <h2>Register a new category</h2>
+                <h2>Registrar una nueva categoria</h2>
               </div>
               <div className={styles.inputs}>
                 <div className={styles.input}>
                   <TextField
                     id="outlined-basic"
-                    label="Name"
+                    label="Nombre"
                     variant="outlined"
+                    value={name}
+                    onChange={(e) => setName((e.target.value).toUpperCase())}
                   />
                   <TextField
                     id="outlined-basic"
                     // label="Image"
                     type='file'
                     variant="outlined"
+                    placeholder="Seleccione una imagen"
+                    onChange={onHandleFileChange}
                   />
                 </div>
                 <div className={styles.input}>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Brand</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={brand}
-                      label="Brand"
-                      onChange={handleBrand}
-                    >
-                      <MenuItem value={'Apple'}>Apple</MenuItem>
-                      <MenuItem value={'Microsoft'}>Microsoft</MenuItem>
-                      <MenuItem value={'TLC'}>TLC</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Product</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={product}
-                      label="Product"
-                      onChange={handleProduct}
-                    >
-                      <MenuItem value={'Apple'}>Iphone 10</MenuItem>
-                      <MenuItem value={'Microsoft'}>Iphone 11</MenuItem>
-                      <MenuItem value={'TLC'}>Iphone 12</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <TextField
+                    id="outlined-basic"
+                    variant="outlined"
+                    label="Abreviacion"
+                    inputProps={{ maxLength: 3 }}
+                    value={abbr}
+                    onChange={(e) => setAbbr((e.target.value).toUpperCase())}
+                  />
                 </div>
               </div>
             </div>
 
             <div className={styles.buttons}>
-              <Button variant="contained" size="large">
-                Register
+              <Button variant="contained" size="large"
+                onClick={onHandleRegister}
+                disabled={isLoading ? true : false}
+              >
+                {isLoading ? <CircularProgress size={26} color='secondary' /> : "Register"}
               </Button>
               <Button
                 variant="contained"
                 size="large"
                 color="error"
-                onClick={close}
+                onClick={onHandleClose}
+                disabled={isLoading ? true : false}
               >
                 Cancel
               </Button>

@@ -7,21 +7,192 @@ import {
   MenuItem,
   Select,
   TextField,
+  CircularProgress
 } from "@mui/material";
+
 import styles from "@/styles/Modal.module.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// amplify
+import { Auth, API, graphqlOperation, Storage } from 'aws-amplify'
+import { createADProduct, createCategoryBrands } from '@/graphql/mutations'
+import { categoryBrandsByADCategoryId } from '@/graphql/queries'
+import { listADCategories, listADBrands } from '@/graphql/queries'
+
+
 
 export default function ModalProducts({ open, close }) {
-  const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
+  const [categoryID, setCategoryID] = useState("");
+  const [brandID, setBrandID] = useState("");
+  const [name, setName] = useState("");
+  const [images, setImages] = useState([]);
+  const [paths, setPaths] = useState([]);
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(undefined)
+  const [brands, setBrands] = useState([])
+  const [categories, setCategories] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleCategories = (event) => {
-    setCategory(event.target.value);
-  };
-  const handleBrand = (event) => {
-    setBrand(event.target.value);
-  };
 
+
+
+
+  useEffect(() => {
+    if (open) fetchData()
+    console.log("modal abierto")
+  }, [open])
+
+
+  const fetchData = () => {
+    fetchCategories()
+    fetchBrands()
+  }
+  const fetchCategories = () => API.graphql(graphqlOperation(listADCategories)).then((r) => setCategories(r.data.listADCategories.items))
+  const fetchBrands = () => API.graphql(graphqlOperation(listADBrands)).then((r) => setBrands(r.data.listADBrands.items))
+
+
+
+
+
+  const onHandleImageSelect = (event) => {
+    const files = event.target.files;
+    console.log(files)
+    if (files.length > 3) alert("Solo puedes seleccionar 3, se eligieron las primeras 3")
+
+    const selected = [];
+
+    for (let i = 0; i < 3; i++) {
+      selected.push(files[i]);
+    }
+    console.log(selected)
+    setImages(selected);
+  }
+
+
+  const onHandleRegister = async () => {
+    console.log("DATA: ", {
+      name,
+      description,
+      price,
+      categoryID,
+      brandID,
+      images
+    })
+
+    if (name === "" || description === "" || categoryID === "" || brandID === "" || !images.length > 0 || price === undefined) {
+      return alert("Campos vacios")
+    }
+    setIsLoading(true)
+    try {
+
+      // Subir imagenes 
+      const keys = await uploadImages(name, images);
+      if (keys === undefined) return
+      console.log(keys)
+      // obtener url
+      const urls = await getImageUrls(keys)
+      if (urls === undefined) return
+      console.log(urls)
+      // creamos producto 
+      const params = {
+        input: {
+          name: name.trim(),
+          images: urls,
+          paths: keys,
+          description: description.trim(),
+          suggestedPrice: price,
+          categoryID: categoryID,
+          brandID: brandID
+        }
+      }
+
+      const result = await API.graphql(graphqlOperation(createADProduct, params))
+      console.log("RESULT: ", result)
+      // verificamos si existe una relacion entre la categoria y la marca 
+      const params2 = {
+        aDCategoryId: categoryID,
+        filter: {
+          aDBrandId: { eq: brandID }
+        }
+      }
+      const result2 = await API.graphql(graphqlOperation(categoryBrandsByADCategoryId, params2))
+      if (result2.data.categoryBrandsByADCategoryId.items.length > 0) return
+      console.log("RELACION: ", result2)
+      //  si no hay relacion crearla 
+      const params3 = {
+        input: {
+          aDBrandId: brandID,
+          aDCategoryId: categoryID
+        }
+      }
+      const result3 = await API.graphql(graphqlOperation(createCategoryBrands, params3))
+      console.log("CREADO NUEVO: ", result3)
+
+      onHandleClose();
+      alert("Producto creado")
+    } catch (error) {
+      console.log("Ocurrio un error", error)
+    }
+    setIsLoading(false)
+  }
+
+
+  const uploadImages = async (name, files) => {
+    try {
+      const uploadPromises = files.map(async (file, index) => {
+
+        const { key } = await Storage.put(`app/images/products/${name}/${name}-${index}.image`, file, {
+          level: "public",
+          contentType: file.type,
+          progressCallback(progress) {
+            console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
+          },
+        })
+        return key
+      })
+      const uploadImageKeys = await Promise.all(uploadPromises)
+      return uploadImageKeys
+    } catch (error) {
+      console.error("Error al cargar imagenes", error);
+      return undefined
+    }
+
+  }
+
+  const getImageUrls = async (paths) => {
+    // obtener datos de almacenamiento 
+    const bucketName = Storage._config.AWSS3.bucket;
+    const region = Storage._config.AWSS3.region;
+    try {
+      const urlPromises = paths.map(async (path) => {
+        const url = `https:${bucketName}.s3.${region}.amazonaws.com/public/${path}`
+        return url;
+      });
+
+      const urls = await Promise.all(urlPromises);
+      return urls
+    } catch (error) {
+      console.error('Error al obtener las URL de las imágenes', error);
+      return undefined
+    }
+
+  }
+
+  const clear = () => {
+    setName("")
+    setDescription("")
+    setPrice(undefined)
+    setImages([])
+    setPaths([])
+    setBrandID("")
+    setCategoryID("")
+    setCategories([])
+    setBrands([])
+  }
+  const onHandleClose = () => {
+    clear();
+    close();
+  }
   return (
     <div>
       <Modal
@@ -38,55 +209,76 @@ export default function ModalProducts({ open, close }) {
               </div>
               <div className={styles.inputs}>
                 {/* <div className={styles.input}> */}
-                  <TextField
-                    id="outlined-basic"
-                    label="Name"
-                    variant="outlined"
-                  />
-                  
+                <TextField
+                  id="outlined-basic"
+                  label="Name"
+                  variant="outlined"
+                  onChange={(e) => setName(e.target.value)}
+                />
+
                 {/* </div> */}
                 <div className={styles.input}>
                   <TextField
                     id="outlined-basic"
                     label="Price"
                     variant="outlined"
+                    type="number"
+                    onChange={(e) => setPrice(e.target.value)}
                   />
                   <TextField
                     id="outlined-basic"
-                    // label="Image"
                     type="file"
                     variant="outlined"
+                    inputProps={{
+                      multiple: true
+                    }}
+                    onChange={onHandleImageSelect}
                   />
                 </div>
+                <TextField
+                  id="outlined-multiline-static"
+                  label="Descripcion"
+                  multiline
+                  rows={1}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
                 <div className={styles.input}>
-                <FormControl fullWidth>
+                  <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">
-                      Category
+                      Categoria
                     </InputLabel>
                     <Select
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
-                      value={category}
-                      label="Category"
-                      onChange={handleCategories}
+                      value={categoryID}
+                      label="Categoria"
+                      onChange={(e) => setCategoryID(e.target.value)}
                     >
-                      <MenuItem value={"Phone"}>Phone</MenuItem>
-                      <MenuItem value={"Laptop"}>Laptop</MenuItem>
-                      <MenuItem value={"Watches"}>Watches</MenuItem>
+
+                      {
+                        categories.length > 0 &&
+                        categories.map((item, index) => (
+                          <MenuItem key={index} value={item.id}>{item.name.toUpperCase()}----{item.abreviation}</MenuItem>
+                        ))
+                      }
                     </Select>
                   </FormControl>
                   <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Brand</InputLabel>
+                    <InputLabel id="demo-simple-select-label">Marca</InputLabel>
                     <Select
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
-                      value={brand}
-                      label="Brand"
-                      onChange={handleBrand}
+                      value={brandID}
+                      label="Marca"
+                      onChange={(e) => setBrandID(e.target.value)}
                     >
-                      <MenuItem value={"Apple"}>Apple</MenuItem>
-                      <MenuItem value={"Microsoft"}>Microsoft</MenuItem>
-                      <MenuItem value={"TLC"}>TLC</MenuItem>
+
+                      {
+                        brands.length > 0 &&
+                        brands.map((item, index) => (
+                          <MenuItem key={index} value={item.id}>{item.name.toUpperCase()}----{item.abreviation}</MenuItem>
+                        ))
+                      }
                     </Select>
                   </FormControl>
                 </div>
@@ -94,14 +286,18 @@ export default function ModalProducts({ open, close }) {
             </div>
 
             <div className={styles.buttons}>
-              <Button variant="contained" size="large">
-                Register
+              <Button variant="contained" size="large"
+                onClick={onHandleRegister}
+                disabled={isLoading ? true : false}
+              >
+                {isLoading ? <CircularProgress size={26} color='secondary' /> : "Register"}
               </Button>
               <Button
                 variant="contained"
                 size="large"
                 color="error"
-                onClick={close}
+                onClick={onHandleClose}
+                disabled={isLoading ? true : false}
               >
                 Cancel
               </Button>
