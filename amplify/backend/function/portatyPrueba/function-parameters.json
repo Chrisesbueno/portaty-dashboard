@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "auth": {
+      "portaty": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

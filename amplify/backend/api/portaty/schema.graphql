@@ -1,0 +1,245 @@
+type ADCategory @model @auth(rules: [
+  { allow: groups, groups: ["admin"] },
+  { allow: private, provider: iam, operations: [read] },
+  { allow: public, provider: iam, operations: [read] },
+  ]) {
+  id: ID! 
+  name: String! @auth(rules:[
+    { allow: groups, groups: ["admin"] },
+    { allow: private, provider: iam, operations: [read] },
+    { allow: public, provider: iam, operations: [read] },
+  ])
+  image: String
+  path: String
+  products: [ADProduct] @hasMany(indexName: "byCategory", fields: ["id"])
+  brands: [ADBrand] @manyToMany(relationName: "CategoryBrands")
+  abreviation: String
+  createdBy: ID @auth(rules:[
+    {allow: groups, groups:["admin"], operations:[read, create, delete]}
+  ])
+}
+
+type ADBrand @model @auth(rules: [
+  { allow: groups, groups: ["admin"] },
+  { allow: private, provider: iam, operations: [read] },
+  { allow: public, provider: iam, operations: [read] },
+  ]) {
+  id: ID!
+   name: String! @auth(rules:[
+    { allow: groups, groups: ["admin"] },
+    { allow: private, provider: iam, operations: [read] },
+    { allow: public, provider: iam, operations: [read] },
+  ])
+  image: String
+  path: String
+  products: [ADProduct] @hasMany(indexName: "byBrand", fields: ["id"])
+  categories: [ADCategory] @manyToMany(relationName: "CategoryBrands")
+  abreviation: String
+  createdBy: ID @auth(rules:[
+    {allow: groups, groups:["admin"], operations:[read, create, delete]}
+  ])
+}
+
+
+type ADProduct @model @auth(rules: [
+  { allow: groups, groups: ["admin"] },
+  { allow: private, provider: iam, operations: [read] },
+  { allow: public, provider: iam, operations: [read] },
+  ]) {
+  id: ID!
+  name: String! @auth(rules:[
+    { allow: groups, groups: ["admin"] },
+    { allow: private, provider: iam, operations: [read] },
+    { allow: public, provider: iam, operations: [read] },
+  ])
+  images: [String]
+  paths: [String]
+  description: String
+  suggestedPrice: Float
+  categoryID: ID @index(name: "byCategory", sortKeyFields: ["name"])
+  brandID: ID @index(name: "byBrand", sortKeyFields: ["name"])
+  phone: GuidePhone 
+  createdBy: ID @auth(rules:[
+    {allow: groups, groups:["admin"], operations:[read, create, delete]}
+  ])
+} 
+
+type GuidePhone {
+    colors: [String]
+    storage: [Int]
+    width: Float
+    height: Float
+    depth: Float
+    weight: Float
+    display: Display
+    camera: Camera
+    battery: Battery
+}
+
+type Display {
+  resolution: String
+  screenSize: String
+  ppi: String
+}
+
+type Camera {
+  primary: Int
+  secondary: Int
+  resolution: String
+}
+
+type Battery {
+  capacity: Int
+  duration: Int
+  usb: String
+}
+
+type Todo @model @auth(rules: [
+  { allow: owner },
+  { allow: private, provider: iam, operations: [read] },
+  { allow: public, provider: iam, operations: [read] },
+  ]) {
+  id: ID!
+  name: String
+  description: String
+  owner: String @auth(rules: [{ allow: owner, operations: [read, delete] }])
+}
+
+type Mutation {
+ pruebaE(credentials: String!): String @function(name: "portaty11dae80f-${env}")
+  pruebaFunc(credentials: String!): String @function(name: "portatyPrueba-${env}")
+}
+
+
+
+type CustomerShop @model @auth(rules:[
+  { allow: owner},
+  { allow: private, provider: iam, operations: [read] },
+  { allow: public, provider: iam, operations: [read] },
+]){
+  userID: ID! @primaryKey
+  name: String! @auth(rules:[
+    {allow: owner},
+    {allow: private, provider: iam, operations: [read]},
+    {allow: public, provider: iam, operations: [read]}
+  ])
+  email: String! @auth(rules:[
+    {allow: owner},
+    {allow: private, provider: iam, operations: [read]},
+    {allow: public, provider: iam, operations: [read]}
+  ])
+  description: String
+  shoppingCart: [CartItem] @hasMany(indexName: "byCustomerShopCartItem", fields: ["userID"])
+  products: [CustomerProduct] @hasMany(indexName: "byCustomerShop", fields: ["userID"])
+  owner: String @auth(rules: [{ allow: owner, operations: [read, delete] }])
+}
+
+type CartItem @model @auth(rules:[
+  {allow: owner},
+  {allow: groups, groups: ["admin"], operations:[read]}
+]){
+  id: ID!
+  productID: ID!
+  customerShopID: ID! @index(name: "byCustomerShopCartItem")
+}
+
+type CustomerProduct @model @auth(rules:[
+  { allow: owner},
+  { allow: private, provider: iam, operations: [read] },
+  { allow: public, provider: iam, operations: [read] },
+]){
+  id: ID!
+  customerID: ID! @index(name: "byCustomerShop",sortKeyFields: ["code"])
+  categoryID: ID!
+  categoryFields: CategoryFields
+  brandID: ID!
+  brandFields: BrandFields
+  productID: ID!
+  productFields: ProductFields
+  # 
+  code: String
+  price: Float!
+  condition: Condition
+  description: String
+  status: CustomerProductStatus @belongsTo
+# campos personalizado dependiendo del producto
+  phoneFields: PhoneFields
+  laptoFields: LaptoFields
+  owner: String @auth(rules: [{ allow: owner, operations: [read, delete] }])
+}
+
+type CategoryFields{
+  name: String!
+  image: String!
+  abreviation: String!
+}
+type BrandFields{
+  name: String!
+  image: String!
+  abreviation: String!
+}
+type ProductFields{
+  name: String!
+  images: String!
+}
+
+type CustomerProductStatus @model @auth(rules:[
+  {allow: groups, groups:["admin"]},
+  {allow: owner, operations: [read, create ,delete]}
+]){
+  id: ID!
+  productID: ID
+  product: CustomerProduct @hasOne(fields: ["productID"])
+  status: ProductStatusValue @default(value: "PUBLISHED")
+  owner: String @auth(rules: [{ allow: owner, operations: [read, delete] }])
+}
+
+enum ProductStatusValue {
+  PUBLISHED
+  PENDING
+  UNPUBLISHED
+}
+
+enum Condition {
+  NEW
+  PERFECT
+  GOOD
+  USED
+}
+
+type PhoneFields {
+  carrier: String!
+  imei: String!
+  model: String!
+  storage: String!
+  batery: String!
+}
+
+type LaptoFields {
+  serial: String!
+}
+
+# type OrdesDetails{
+#   id
+#   userID
+#   paymentID
+#   shipping 
+#   items: []
+#   total: string 
+#   createATdate
+#   updateAtDate
+# }
+# shipping{
+#   country
+# dsjpdsjds
+# }
+# item{
+#   id 
+#   orderId
+#   productID
+# }
+# paymentDetais{
+#   id
+#   stripePaymentID
+#   metadata: 
+# }
