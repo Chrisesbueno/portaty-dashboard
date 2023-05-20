@@ -3,7 +3,7 @@ import Menu from "@/components/Menu";
 import styles from "@/styles/Dashboard.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Button } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import Card from "@/components/Card";
 import StoreIcon from "@mui/icons-material/Store";
 import AirportShuttleIcon from "@mui/icons-material/AirportShuttle";
@@ -12,13 +12,12 @@ import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
-import { TextField, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
+import { TextField } from '@mui/material';
 // amplify 
 import { Auth, API, graphqlOperation, Storage } from 'aws-amplify'
 import { listADCategories, listADBrands, listADProducts } from '@/graphql/queries'
 import { onCreateADCategory, onCreateADProduct, onCreateADBrand } from '@/graphql/subscriptions'
-
-
+import TableProducts from "@/components/TableProducts";
 
 const TablesInformation = ({ title, information }) => {
   console.log("INFORMATION: ", information)
@@ -48,6 +47,51 @@ const TablesInformation = ({ title, information }) => {
     );
 
   }
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 150,
+      editable: true,
+    },
+    {
+      field: 'images',
+      headerName: 'Images',
+      width: 110,
+      renderCell: (params) => {
+        return (
+          <Stack>
+            <img src="" alt="" />
+          </Stack>
+        );
+      }
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 110,
+      renderCell: (params) => {
+        return (
+          <Stack>
+            <button>{params.value.eliminated}</button>
+          </Stack>
+        );
+      }
+    },
+  ];
+
+  const rows = [
+    { id: 1, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+    { id: 2, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+    { id: 3, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+    { id: 4, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+    { id: 5, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+    { id: 6, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+    { id: 7, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+  ];
+
   return (
 
     <div>
@@ -68,26 +112,7 @@ const TablesInformation = ({ title, information }) => {
         onChange={handleSearchDescriptionChange}
       />
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Imagen</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {/* {information.length > 0 && filteredProducts(information).map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>{product.id}</TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.image}</TableCell>
-              </TableRow>
-            ))} */}
-          </TableBody>
-        </Table>
-      </TableContainer>
+     <TableProducts columns={columns} rows={rows} />
     </div>
 
   )
@@ -100,31 +125,22 @@ const Dashboard = () => {
   const [openBrands, setOpenBrands] = useState(false);
   const [openProducts, setOpenProducts] = useState(false);
 
-
-
   // list Products
   const [categories, setCategories] = useState([])
-  const [brands, setBrands] = useState(undefined)
-  const [products, setProducts] = useState(undefined)
+  const [brands, setBrands] = useState([])
+  const [products, setProducts] = useState([])
 
-
-
-
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const user = await Auth.currentAuthenticatedUser();
-
-      } catch (error) {
-        router.push({ pathname: `/` })
-      }
-    }
-
-    checkUser();
-  }, [router])
+  const fecthShop = async () => {
+    const listCategories = await API.graphql(graphqlOperation(listADCategories));
+    const listBrands = await API.graphql(graphqlOperation(listADBrands));
+    const listProducts = await API.graphql(graphqlOperation(listADProducts));
+    console.log('categories', listCategories)
+    console.log('brands', listBrands)
+    console.log('products', listProducts)
+  };
 
   useEffect(() => {
-    fecthCategories();
+    fecthShop()
     const susbcriptionCategory = API.graphql(graphqlOperation(onCreateADCategory)).subscribe({
       next: (event) => {
         // console.log(event)
@@ -137,22 +153,18 @@ const Dashboard = () => {
     return () => {
       susbcriptionCategory.unsubscribe()
     }
-  }, [])
 
+    const checkUser = async () => {
+      try {
+        const user = await Auth.currentAuthenticatedUser();
 
+      } catch (error) {
+        router.push({ pathname: `/` })
+      }
+    }
+    checkUser();
+  }, [router])
 
-
-
-  const susbcriptionBrand = () => {
-
-  }
-  const susbcriptionProduct = () => {
-
-  }
-
-  const fecthCategories = () => API.graphql(graphqlOperation(listADCategories)).then((e) => setCategories(e.data.listADCategories.items))
-  const fecthBrands = () => API.graphql(graphqlOperation(listADBrands)).then((e) => setBrands(e.data.listADBrands.items))
-  const fecthProducts = () => API.graphql(graphqlOperation(listADProducts)).then((e) => setProducts(e.data.listADProducts.items))
   return (
     <div className={styles.content}>
       <Menu />
