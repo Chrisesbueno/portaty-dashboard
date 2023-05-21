@@ -1,5 +1,8 @@
 // Amplify ---------------
-import "./amplify.js"
+import { Amplify } from 'aws-amplify';
+import awsExports from '../aws-exports';
+
+
 import { useEffect, useState } from 'react'
 import { Hub, Auth } from 'aws-amplify'
 
@@ -38,7 +41,7 @@ const theme = createTheme({
 });
 
 
-
+Amplify.configure({ ...awsExports, ssr: true });
 const App = ({ Component, pageProps }) => {
   const [isUserAuth, setIsUserAuth] = useState(false)
   const router = useRouter();
