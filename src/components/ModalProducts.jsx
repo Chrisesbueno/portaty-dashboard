@@ -61,7 +61,7 @@ export default function ModalProducts({ open, close }) {
 
     const selected = [];
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < files.length; i++) {
       selected.push(files[i]);
     }
     console.log(selected)
@@ -84,12 +84,13 @@ export default function ModalProducts({ open, close }) {
     }
     setIsLoading(true)
     try {
-
-      // Subir imagenes 
+      // usuario logeado
+      const { username } = await Auth.currentAuthenticatedUser();
+      // // Subir imagenes 
       const keys = await uploadImages(name, images);
       if (keys === undefined) return
       console.log(keys)
-      // obtener url
+      //  obtener url
       const urls = await getImageUrls(keys)
       if (urls === undefined) return
       console.log(urls)
@@ -102,7 +103,8 @@ export default function ModalProducts({ open, close }) {
           description: description.trim(),
           suggestedPrice: price,
           categoryID: categoryID,
-          brandID: brandID
+          brandID: brandID,
+          createdBy: username
         }
       }
 
@@ -116,8 +118,9 @@ export default function ModalProducts({ open, close }) {
         }
       }
       const result2 = await API.graphql(graphqlOperation(categoryBrandsByADCategoryId, params2))
-      if (result2.data.categoryBrandsByADCategoryId.items.length > 0) return
       console.log("RELACION: ", result2)
+      if (result2.data.categoryBrandsByADCategoryId.items.length > 0) return closeOther();
+
       //  si no hay relacion crearla 
       const params3 = {
         input: {
@@ -129,14 +132,17 @@ export default function ModalProducts({ open, close }) {
       console.log("CREADO NUEVO: ", result3)
 
       onHandleClose();
-      alert("Producto creado")
+
     } catch (error) {
       console.log("Ocurrio un error", error)
     }
     setIsLoading(false)
   }
 
-
+  const closeOther = () => {
+    alert("Producto creado");
+    onHandleClose();
+  }
   const uploadImages = async (name, files) => {
     try {
       const uploadPromises = files.map(async (file, index) => {
@@ -188,6 +194,7 @@ export default function ModalProducts({ open, close }) {
     setCategoryID("")
     setCategories([])
     setBrands([])
+    setIsLoading(false)
   }
   const onHandleClose = () => {
     clear();
@@ -213,7 +220,8 @@ export default function ModalProducts({ open, close }) {
                   id="outlined-basic"
                   label="Name"
                   variant="outlined"
-                  onChange={(e) => setName(e.target.value)}
+                  value={name}
+                  onChange={(e) => setName((e.target.value).toUpperCase())}
                 />
 
                 {/* </div> */}

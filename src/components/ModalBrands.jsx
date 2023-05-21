@@ -23,6 +23,8 @@ export default function ModalBrands({ open, close }) {
     if (abbr.trim() === "") return alert("abbr vacio")
     setIsLoading(true)
     try {
+       // usuario logeado
+       const { username } = await Auth.currentAuthenticatedUser();
       // obtener datos de almacenamiento 
       const bucketName = Storage._config.AWSS3.bucket;
       const region = Storage._config.AWSS3.region;
@@ -35,7 +37,8 @@ export default function ModalBrands({ open, close }) {
           name: name.trim(),
           abreviation: abbr.trim(),
           path: key,
-          image: url
+          image: url,
+          createdBy: username
         }
       }
 
@@ -43,7 +46,7 @@ export default function ModalBrands({ open, close }) {
       const result = await API.graphql(graphqlOperation(createADBrand, params));
       console.log("Result: ", result)
       onHandleClose();
-      alert("Categoria Subida")
+      alert("Marca Subida")
     } catch (error) {
       console.error("Error: ", error);
     }
@@ -92,6 +95,7 @@ export default function ModalBrands({ open, close }) {
     setName("");
     setFile("");
     setAbbr("");
+    setIsLoading(false)
   }
 
   const onHandleFileChange = (data) => {
@@ -126,7 +130,8 @@ export default function ModalBrands({ open, close }) {
                     id="outlined-basic"
                     label="Nombre"
                     variant="outlined"
-                    onChange={(e) => setName(e.target.value)}
+                    value={name}
+                    onChange={(e) => setName((e.target.value).toUpperCase())}
                   />
                   <TextField
                     id="outlined-basic"
@@ -143,36 +148,10 @@ export default function ModalBrands({ open, close }) {
                     id="outlined-basic"
                     variant="outlined"
                     label="Abreviacion"
-                    onChange={(e) => setAbbr(e.target.value)}
+                    inputProps={{ maxLength: 3 }}
+                    value={abbr}
+                    onChange={(e) => setAbbr((e.target.value).toUpperCase())}
                   />
-                  {/* <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={category}
-                      label="Category"
-                      onChange={handleCategories}
-                    >
-                      <MenuItem value={'Apple'}>Phone</MenuItem>
-                      <MenuItem value={'Microsoft'}>Laptop</MenuItem>
-                      <MenuItem value={'TLC'}>Watches</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Product</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={product}
-                      label="Product"
-                      onChange={handleProduct}
-                    >
-                      <MenuItem value={'Apple'}>Iphone 10</MenuItem>
-                      <MenuItem value={'Microsoft'}>Iphone 11</MenuItem>
-                      <MenuItem value={'TLC'}>Iphone 12</MenuItem>
-                    </Select>
-                  </FormControl> */}
                 </div>
               </div>
             </div>
