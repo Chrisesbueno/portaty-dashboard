@@ -13,110 +13,76 @@ import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
 import { TextField } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
 // amplify 
 import { Auth, API, graphqlOperation, Storage } from 'aws-amplify'
 import { listADCategories, listADBrands, listADProducts } from '@/graphql/queries'
+import { customListADCategories, customListADBrands, customListADProducts } from '@/graphql/customQueries'
 import { onCreateADCategory, onCreateADProduct, onCreateADBrand } from '@/graphql/subscriptions'
-import TableProducts from "@/components/TableProducts";
+import TableGrid from "@/components/TableProducts";
 
-const TablesInformation = ({ title, information }) => {
-  console.log("INFORMATION: ", information)
-  // search 
-  const [searchId, setSearchId] = useState('');
-  const [searchName, setSearchName] = useState('');
-  const [searchDescription, setSearchDescription] = useState('');
-
-  // function search 
-  const handleSearchIdChange = (event) => {
-    setSearchId(event.target.value);
-  };
-
-  const handleSearchNameChange = (event) => {
-    setSearchName(event.target.value);
-  };
-
-  const handleSearchDescriptionChange = (event) => {
-    setSearchDescription(event.target.value);
-  };
-  const filteredProducts = () => {
-    if (!information.length > 0) return
-    return information.filter((product) =>
-      product.id.toString().includes(searchId) &&
-      product.name.toLowerCase().includes(searchName.toLowerCase()) &&
-      product.description.toLowerCase().includes(searchDescription.toLowerCase())
-    );
-
-  }
-
+const Table = ({ title, data = [] }) => {
   const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    {
-      field: 'name',
-      headerName: 'Name',
-      width: 150,
-      editable: true,
-    },
-    {
-      field: 'images',
-      headerName: 'Images',
-      width: 110,
-      renderCell: (params) => {
-        return (
-          <Stack>
-            <img src="" alt="" />
-          </Stack>
-        );
-      }
-    },
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'name', headerName: 'Nombre', width: 150 },
+    { field: 'image', headerName: 'Imagen', width: 300 },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: 'Actiones',
       width: 110,
       renderCell: (params) => {
         return (
           <Stack>
-            <button>{params.value.eliminated}</button>
+            <IconButton aria-label="delete" color="error">
+              <DeleteIcon />
+            </IconButton>
           </Stack>
         );
       }
     },
-  ];
-
-  const rows = [
-    { id: 1, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 2, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 3, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 4, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 5, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 6, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 7, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
   ];
 
   return (
 
     <div>
       <h3>{title}</h3>
-      <TextField
-        label="Buscar por ID"
-        value={searchId}
-        onChange={handleSearchIdChange}
-      />
-      <TextField
-        label="Buscar por nombre"
-        value={searchName}
-        onChange={handleSearchNameChange}
-      />
-      <TextField
-        label="Buscar por imagen"
-        value={searchDescription}
-        onChange={handleSearchDescriptionChange}
-      />
-
-     <TableProducts columns={columns} rows={rows} />
+      <TableGrid columns={columns} rows={data} />
     </div>
 
   )
 }
+
+const ProductsTable = ({ title, data = [] }) => {
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 200 },
+    { field: 'name', headerName: 'Nombre', width: 200 },
+    { field: 'images', headerName: 'Imagenes', width: 200 },
+    {
+      field: 'actions',
+      headerName: 'Actiones',
+      width: 110,
+      renderCell: (params) => {
+        return (
+          <Stack>
+            <IconButton aria-label="delete" color="error">
+              <DeleteIcon />
+            </IconButton>
+          </Stack>
+        );
+      }
+    },
+  ];
+  return (
+    <div>
+      <h3>{title}</h3>
+      <TableGrid columns={columns} rows={data} />
+    </div>
+
+  )
+}
+
+
 
 const Dashboard = () => {
   const router = useRouter();
@@ -131,39 +97,18 @@ const Dashboard = () => {
   const [products, setProducts] = useState([])
 
   const fecthShop = async () => {
-    const listCategories = await API.graphql(graphqlOperation(listADCategories));
-    const listBrands = await API.graphql(graphqlOperation(listADBrands));
-    const listProducts = await API.graphql(graphqlOperation(listADProducts));
-    console.log('categories', listCategories)
-    console.log('brands', listBrands)
-    console.log('products', listProducts)
+    const dataCategories = await API.graphql(graphqlOperation(customListADCategories))
+    const dataBrands = await API.graphql(graphqlOperation(customListADBrands));
+    const dataProducts = await API.graphql(graphqlOperation(customListADProducts));
+
+    setCategories(dataCategories)
+    setBrands(dataBrands)
+    setProducts(dataProducts)
   };
 
   useEffect(() => {
-    fecthShop()
-    const susbcriptionCategory = API.graphql(graphqlOperation(onCreateADCategory)).subscribe({
-      next: (event) => {
-        // console.log(event)
-      },
-      error: (error) => {
-        console.error('Error al suscribirse a los cambios:', error);
-      }
-    })
-
-    return () => {
-      susbcriptionCategory.unsubscribe()
-    }
-
-    const checkUser = async () => {
-      try {
-        const user = await Auth.currentAuthenticatedUser();
-
-      } catch (error) {
-        router.push({ pathname: `/` })
-      }
-    }
-    checkUser();
-  }, [router])
+    if (!openCategories && !openBrands && !openProducts) fecthShop()
+  }, [openCategories, openBrands, openProducts])
 
   return (
     <div className={styles.content}>
@@ -180,7 +125,7 @@ const Dashboard = () => {
               variant="contained"
               size="large"
               onClick={() => setOpenCategories(true)}
-              startIcon={<StoreIcon />}
+              // startIcon={<StoreIcon />}
               endIcon={<AddIcon />}
             >
               Add new category
@@ -189,7 +134,7 @@ const Dashboard = () => {
               variant="contained"
               size="large"
               onClick={() => setOpenBrands(true)}
-              startIcon={<AirportShuttleIcon />}
+              // startIcon={<AirportShuttleIcon />}
               endIcon={<AddIcon />}
             >
               Add new brand
@@ -198,7 +143,7 @@ const Dashboard = () => {
               variant="contained"
               size="large"
               onClick={() => setOpenProducts(true)}
-              startIcon={<ConfirmationNumberIcon />}
+              // startIcon={<ConfirmationNumberIcon />}
               endIcon={<AddIcon />}
             >
               Add new product
@@ -207,9 +152,9 @@ const Dashboard = () => {
             <ModalBrands open={openBrands} close={() => setOpenBrands(false)} />
             <ModalProducts open={openProducts} close={() => setOpenProducts(false)} />
           </div>
-          <TablesInformation title={"Categoria"} information={categories} />
-          <TablesInformation title={"Marcas"} information={brands} />
-          <TablesInformation title={"Productos"} information={products} />
+          <Table title={"Categoria"} data={categories?.data?.listADCategories?.items} />
+          <Table title={"Marcas"} data={brands?.data?.listADBrands?.items} />
+          <ProductsTable title={"Productos"} data={products?.data?.listADProducts?.items} />
         </div>
 
         <Button
