@@ -4,42 +4,64 @@ import styles from "@/styles/Dashboard.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Button, Stack } from "@mui/material";
-import Card from "@/components/Card";
-import StoreIcon from "@mui/icons-material/Store";
-import AirportShuttleIcon from "@mui/icons-material/AirportShuttle";
+
 import AddIcon from "@mui/icons-material/Add";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+
 import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
-import { TextField } from '@mui/material';
+import { TextField, Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
 // amplify 
-import { Auth, API, graphqlOperation, Storage } from 'aws-amplify'
-import { listADCategories, listADBrands, listADProducts } from '@/graphql/queries'
+import { Auth, API, graphqlOperation } from 'aws-amplify'
 import { customListADCategories, customListADBrands, customListADProducts } from '@/graphql/customQueries'
-import { onCreateADCategory, onCreateADProduct, onCreateADBrand } from '@/graphql/subscriptions'
+
 import TableGrid from "@/components/TableProducts";
 
+
+
+
 const Table = ({ title, data = [] }) => {
+
+  const [searchName, setSearchName] = useState('');
+  const [searchID, setSearchID] = useState('');
+  const [searchAbbr, setSearchAbbr] = useState('');
+
+
+  const filteredData = data.filter((item) =>
+    item.id.toString().includes(searchID) &&
+    item.name.toLowerCase().includes(searchName.toLowerCase()) &&
+    item.image && item.abreviation.toLowerCase().includes(searchAbbr.toLocaleLowerCase())
+  );
+
   const columns = [
     { field: 'id', headerName: 'ID', width: 100 },
     { field: 'name', headerName: 'Nombre', width: 150 },
-    { field: 'image', headerName: 'Imagen', width: 300 },
     {
-      field: 'actions',
-      headerName: 'Actiones',
-      width: 110,
-      renderCell: (params) => {
-        return (
-          <Stack>
-            <IconButton aria-label="delete" color="error">
-              <DeleteIcon />
-            </IconButton>
-          </Stack>
-        );
-      }
+      field: 'image',
+      headerName: 'Imagen',
+      width: 150,
+      renderCell: (params) => (<CustomImageColumn value={params.value} />),
+    },
+    { field: 'abreviation', headerName: 'Abreviacion', width: 150 },
+    {
+      // field: 'actions',
+      // headerName: 'Actiones',
+      // width: 110,
+      // renderCell: (params) => {
+      //   return (
+      //     <Stack>
+      //       <IconButton aria-label="delete" color="error">
+      //         <DeleteIcon />
+      //       </IconButton>
+      //     </Stack>
+
+
+      //   );
+      // }
     },
   ];
 
@@ -47,36 +69,113 @@ const Table = ({ title, data = [] }) => {
 
     <div>
       <h3>{title}</h3>
-      <TableGrid columns={columns} rows={data} />
+      <Grid container justifyContent="start" spacing={1}>
+        <Grid item >
+          <TextField
+            label="Buscar por ID"
+            value={searchID}
+            onChange={(e) => setSearchID(e.target.value)}
+          />
+        </Grid>
+        <Grid item >
+          <TextField
+            label="Buscar por nombre"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+        </Grid>
+        <Grid item >
+          <TextField
+            label="Buscar por Abreviacion"
+            value={searchAbbr}
+            onChange={(e) => setSearchAbbr(e.target.value)}
+          />
+        </Grid>
+      </Grid >
+
+
+      <TableGrid columns={columns} rows={filteredData} />
     </div>
 
   )
 }
 
-const ProductsTable = ({ title, data = [] }) => {
-  const columns = [
-    { field: 'id', headerName: 'ID', width: 200 },
-    { field: 'name', headerName: 'Nombre', width: 200 },
-    { field: 'images', headerName: 'Imagenes', width: 200 },
-    {
-      field: 'actions',
-      headerName: 'Actiones',
-      width: 110,
-      renderCell: (params) => {
-        return (
-          <Stack>
-            <IconButton aria-label="delete" color="error">
-              <DeleteIcon />
-            </IconButton>
-          </Stack>
-        );
+const CustomImageColumn = ({ value }) => {
+
+  return (
+    <>
+      {
+        typeof value === "string" ?
+          <Grid container justifyContent="start" spacing={1}>
+            <Grid item >
+              <a target="_blank" href={value} >
+                <img src={value} alt={`Image `} width={"50%"} height={40} className={styles.image} />
+              </a>
+            </Grid>
+          </Grid >
+          :
+          <Grid container justifyContent="start" spacing={1}>
+            {
+
+              value.map((image, index) => (
+                <Grid item key={index}>
+                  <a target="_blank" href={image} >
+                    <img src={image} alt={`Image ${index + 1}`} width={50} height={45} className={styles.image} />
+                  </a>
+                </Grid>
+              ))
+            }
+          </Grid >
       }
+    </>
+
+
+  );
+};
+
+const ProductsTable = ({ title, data = [] }) => {
+  const [searchName, setSearchName] = useState('');
+  const [searchID, setSearchID] = useState('');
+
+  const filteredData = data.filter((item) =>
+    item.id.toString().includes(searchID) &&
+    item.name.toLowerCase().includes(searchName.toLowerCase()) &&
+    item.images
+  );
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 50 },
+    { field: 'name', headerName: 'Nombre', width: 200 },
+    {
+      field: 'images',
+      headerName: 'Imagenes',
+      width: 200,
+      renderCell: (params) => (<CustomImageColumn value={params.value} />),
     },
   ];
+
+
+
   return (
     <div>
       <h3>{title}</h3>
-      <TableGrid columns={columns} rows={data} />
+      <Grid container justifyContent="start" spacing={1}>
+        <Grid item >
+          <TextField
+            label="Buscar por ID"
+            value={searchID}
+            onChange={(e) => setSearchID(e.target.value)}
+          />
+        </Grid>
+        <Grid item >
+          <TextField
+            label="Buscar por nombre"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+        </Grid>
+      </Grid >
+      <TableGrid columns={columns} rows={filteredData} />
     </div>
 
   )
@@ -128,7 +227,7 @@ const Dashboard = () => {
               // startIcon={<StoreIcon />}
               endIcon={<AddIcon />}
             >
-              Add new category
+              Agg Categoria
             </Button>
             <Button
               variant="contained"
@@ -137,7 +236,7 @@ const Dashboard = () => {
               // startIcon={<AirportShuttleIcon />}
               endIcon={<AddIcon />}
             >
-              Add new brand
+              Agg Marca
             </Button>
             <Button
               variant="contained"
@@ -146,7 +245,7 @@ const Dashboard = () => {
               // startIcon={<ConfirmationNumberIcon />}
               endIcon={<AddIcon />}
             >
-              Add new product
+              Agg Producto
             </Button>
             <ModalCategories open={openCategories} close={() => setOpenCategories(false)} />
             <ModalBrands open={openBrands} close={() => setOpenBrands(false)} />

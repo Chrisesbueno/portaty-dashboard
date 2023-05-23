@@ -28,6 +28,7 @@ export default function ModalBrands({ open, close }) {
       // obtener datos de almacenamiento 
       const bucketName = Storage._config.AWSS3.bucket;
       const region = Storage._config.AWSS3.region;
+      
       // subir imagen 
       const key = await uploadImage(name, file)
       // obtener url
