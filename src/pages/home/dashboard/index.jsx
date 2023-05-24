@@ -101,7 +101,7 @@ const Table = ({ title, data = [] }) => {
 }
 
 const CustomImageColumn = ({ value }) => {
-
+console.log("IMAGENES: ",value)
   return (
     <>
       {
