@@ -17,3 +17,5 @@ export { default as CustomerShopCreateForm } from "./CustomerShopCreateForm";
 export { default as CustomerShopUpdateForm } from "./CustomerShopUpdateForm";
 export { default as CustomerProductStatusCreateForm } from "./CustomerProductStatusCreateForm";
 export { default as CustomerProductStatusUpdateForm } from "./CustomerProductStatusUpdateForm";
+export { default as PaymentStripeCreateForm } from "./PaymentStripeCreateForm";
+export { default as PaymentStripeUpdateForm } from "./PaymentStripeUpdateForm";
