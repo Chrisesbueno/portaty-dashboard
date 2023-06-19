@@ -3,6 +3,7 @@ import Menu from "@/components/Menu";
 import styles from "@/styles/Dashboard.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from 'next/image'
 import { Button, Stack } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -11,10 +12,8 @@ import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
 import { TextField, Grid } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import IconButton from '@mui/material/IconButton';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
+
+import { writeFile, utils } from 'xlsx'
 // amplify 
 import { Auth, API, graphqlOperation } from 'aws-amplify'
 import { customListADCategories, customListADBrands, customListADProducts } from '@/graphql/customQueries'
@@ -101,16 +100,19 @@ const Table = ({ title, data = [] }) => {
 }
 
 const CustomImageColumn = ({ value }) => {
-console.log("IMAGENES: ",value)
+
   return (
     <>
       {
         typeof value === "string" ?
           <Grid container justifyContent="start" spacing={1}>
             <Grid item >
-              <a target="_blank" href={value} >
-                <img src={value} alt={`Image `} width={"50%"} height={40} className={styles.image} />
-              </a>
+              <Image
+                src={value}
+                width={50}
+                height={50}
+                alt={"ALT"}
+              />
             </Grid>
           </Grid >
           :
@@ -119,9 +121,13 @@ console.log("IMAGENES: ",value)
 
               value.map((image, index) => (
                 <Grid item key={index}>
-                  <a target="_blank" href={image} >
-                    <img src={image} alt={`Image ${index + 1}`} width={50} height={45} className={styles.image} />
-                  </a>
+                  <Image
+                    src={image}
+                    width={50}
+                    height={50}
+                    alt={`Image ${index + 1}`}
+                    key={`image-${index + 1}`}
+                  />
                 </Grid>
               ))
             }
@@ -206,8 +212,81 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!openCategories && !openBrands && !openProducts) fecthShop()
+    if (!openCategories && !openBrands && !openProducts) fecthShop();
   }, [openCategories, openBrands, openProducts])
+
+
+
+  const obtenerMarcas = () => {
+    const url = 'https://mobile-phones2.p.rapidapi.com/brands';
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9d306625c7mshcfa5d06d7dcf07fp134c5cjsne107bbad8201',
+        'X-RapidAPI-Host': 'mobile-phones2.p.rapidapi.com'
+      }
+    };
+
+    fetch(url, options)
+      .then((result) => {
+        result.json().then(async (r) => {
+          console.log("MARCAS: ", r)
+          // const resultPromise = await Promise.all(r.map(async (marca, index) => {
+          //   const result = await obtenerTelefonoMarca(marca.id)
+          //   return result
+          // }))
+
+
+        })
+      })
+      .catch((e) => console.error(e))
+  }
+
+
+  const obtenerTelefonoMarca = async (marcaID) => {
+    const url = `https://mobile-phones2.p.rapidapi.com/${marcaID}/phones`;
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9d306625c7mshcfa5d06d7dcf07fp134c5cjsne107bbad8201',
+        'X-RapidAPI-Host': 'mobile-phones2.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const result = await fetch(url, options);
+      const response = await result.json();
+      console.log("DATA: 48: ", response.data)
+      return response.data;
+    } catch (error) {
+      console.log("ERROR: en busca de telefonos: ", error)
+      return null
+    }
+
+    // fetch(url, options)
+    //   .then((result) => {
+    //     result.json().then(r => descargarArchivoExcel(r.data, `TLF:${marcaID}`))
+    //   })
+    //   .catch((e) => console.error(e))
+  }
+
+  // Función para descargar el archivo Excel
+  const descargarArchivoExcel = (data, title) => {
+    // Crear un nuevo libro de Excel
+    const workbook = utils.book_new();
+
+    // Convertir el objeto JSON a una matriz de hojas de cálculo
+    const worksheetData = utils.json_to_sheet(data);
+
+    // Añadir la hoja de cálculo al libro de Excel
+    utils.book_append_sheet(workbook, worksheetData, 'Datos');
+
+    // Escribir el libro de Excel en un archivo
+    writeFile(workbook, `${title}.xlsx`);
+  };
+
+
+
 
   return (
     <div className={styles.content}>
