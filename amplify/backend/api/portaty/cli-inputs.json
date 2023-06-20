@@ -10,6 +10,14 @@
     "additionalAuthTypes": [
       {
         "mode": "AWS_IAM"
+      },
+      {
+        "mode": "OPENID_CONNECT",
+        "openIDProviderName": "google",
+        "openIDIssuerURL": "https://accounts.google.com/o/oauth2/auth/",
+        "openIDClientID": "959689221062-gscr0nvkcbn73k65fnh4liupca4bc8sr.apps.googleusercontent.com",
+        "openIDAuthTTL": "3600000",
+        "openIDIatTTL": "3600000"
       }
     ],
     "conflictResolution": {}

@@ -8,13 +8,13 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { getOverrideProps } from "@aws-amplify/ui-react/internal";
-import { Todo } from "../models";
+import { PaymentStripe } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
-export default function TodoUpdateForm(props) {
+export default function PaymentStripeUpdateForm(props) {
   const {
     id: idProp,
-    todo: todoModelProp,
+    paymentStripe: paymentStripeModelProp,
     onSuccess,
     onError,
     onSubmit,
@@ -24,38 +24,38 @@ export default function TodoUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    owner: "",
-    postname: "",
-    content: "",
+    paymentStripeID: "",
+    metadata: "",
   };
-  const [owner, setOwner] = React.useState(initialValues.owner);
-  const [postname, setPostname] = React.useState(initialValues.postname);
-  const [content, setContent] = React.useState(initialValues.content);
+  const [paymentStripeID, setPaymentStripeID] = React.useState(
+    initialValues.paymentStripeID
+  );
+  const [metadata, setMetadata] = React.useState(initialValues.metadata);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    const cleanValues = todoRecord
-      ? { ...initialValues, ...todoRecord }
+    const cleanValues = paymentStripeRecord
+      ? { ...initialValues, ...paymentStripeRecord }
       : initialValues;
-    setOwner(cleanValues.owner);
-    setPostname(cleanValues.postname);
-    setContent(cleanValues.content);
+    setPaymentStripeID(cleanValues.paymentStripeID);
+    setMetadata(cleanValues.metadata);
     setErrors({});
   };
-  const [todoRecord, setTodoRecord] = React.useState(todoModelProp);
+  const [paymentStripeRecord, setPaymentStripeRecord] = React.useState(
+    paymentStripeModelProp
+  );
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
-        ? await DataStore.query(Todo, idProp)
-        : todoModelProp;
-      setTodoRecord(record);
+        ? await DataStore.query(PaymentStripe, idProp)
+        : paymentStripeModelProp;
+      setPaymentStripeRecord(record);
     };
     queryData();
-  }, [idProp, todoModelProp]);
-  React.useEffect(resetStateValues, [todoRecord]);
+  }, [idProp, paymentStripeModelProp]);
+  React.useEffect(resetStateValues, [paymentStripeRecord]);
   const validations = {
-    owner: [],
-    postname: [],
-    content: [],
+    paymentStripeID: [{ type: "Required" }],
+    metadata: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -83,9 +83,8 @@ export default function TodoUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          owner,
-          postname,
-          content,
+          paymentStripeID,
+          metadata,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -116,7 +115,7 @@ export default function TodoUpdateForm(props) {
             }
           });
           await DataStore.save(
-            Todo.copyOf(todoRecord, (updated) => {
+            PaymentStripe.copyOf(paymentStripeRecord, (updated) => {
               Object.assign(updated, modelFields);
             })
           );
@@ -129,86 +128,58 @@ export default function TodoUpdateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "TodoUpdateForm")}
+      {...getOverrideProps(overrides, "PaymentStripeUpdateForm")}
       {...rest}
     >
       <TextField
-        label="Owner"
-        isRequired={false}
+        label="Payment stripe id"
+        isRequired={true}
         isReadOnly={false}
-        value={owner}
+        value={paymentStripeID}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              owner: value,
-              postname,
-              content,
+              paymentStripeID: value,
+              metadata,
             };
             const result = onChange(modelFields);
-            value = result?.owner ?? value;
+            value = result?.paymentStripeID ?? value;
           }
-          if (errors.owner?.hasError) {
-            runValidationTasks("owner", value);
+          if (errors.paymentStripeID?.hasError) {
+            runValidationTasks("paymentStripeID", value);
           }
-          setOwner(value);
+          setPaymentStripeID(value);
         }}
-        onBlur={() => runValidationTasks("owner", owner)}
-        errorMessage={errors.owner?.errorMessage}
-        hasError={errors.owner?.hasError}
-        {...getOverrideProps(overrides, "owner")}
+        onBlur={() => runValidationTasks("paymentStripeID", paymentStripeID)}
+        errorMessage={errors.paymentStripeID?.errorMessage}
+        hasError={errors.paymentStripeID?.hasError}
+        {...getOverrideProps(overrides, "paymentStripeID")}
       ></TextField>
       <TextField
-        label="Postname"
+        label="Metadata"
         isRequired={false}
         isReadOnly={false}
-        value={postname}
+        value={metadata}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              owner,
-              postname: value,
-              content,
+              paymentStripeID,
+              metadata: value,
             };
             const result = onChange(modelFields);
-            value = result?.postname ?? value;
+            value = result?.metadata ?? value;
           }
-          if (errors.postname?.hasError) {
-            runValidationTasks("postname", value);
+          if (errors.metadata?.hasError) {
+            runValidationTasks("metadata", value);
           }
-          setPostname(value);
+          setMetadata(value);
         }}
-        onBlur={() => runValidationTasks("postname", postname)}
-        errorMessage={errors.postname?.errorMessage}
-        hasError={errors.postname?.hasError}
-        {...getOverrideProps(overrides, "postname")}
-      ></TextField>
-      <TextField
-        label="Content"
-        isRequired={false}
-        isReadOnly={false}
-        value={content}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              owner,
-              postname,
-              content: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.content ?? value;
-          }
-          if (errors.content?.hasError) {
-            runValidationTasks("content", value);
-          }
-          setContent(value);
-        }}
-        onBlur={() => runValidationTasks("content", content)}
-        errorMessage={errors.content?.errorMessage}
-        hasError={errors.content?.hasError}
-        {...getOverrideProps(overrides, "content")}
+        onBlur={() => runValidationTasks("metadata", metadata)}
+        errorMessage={errors.metadata?.errorMessage}
+        hasError={errors.metadata?.hasError}
+        {...getOverrideProps(overrides, "metadata")}
       ></TextField>
       <Flex
         justifyContent="space-between"
@@ -221,7 +192,7 @@ export default function TodoUpdateForm(props) {
             event.preventDefault();
             resetStateValues();
           }}
-          isDisabled={!(idProp || todoModelProp)}
+          isDisabled={!(idProp || paymentStripeModelProp)}
           {...getOverrideProps(overrides, "ResetButton")}
         ></Button>
         <Flex
@@ -233,7 +204,7 @@ export default function TodoUpdateForm(props) {
             type="submit"
             variation="primary"
             isDisabled={
-              !(idProp || todoModelProp) ||
+              !(idProp || paymentStripeModelProp) ||
               Object.values(errors).some((e) => e?.hasError)
             }
             {...getOverrideProps(overrides, "SubmitButton")}

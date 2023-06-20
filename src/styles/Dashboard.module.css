@@ -26,3 +26,10 @@
   line-height: 39px;
   color: var(--black);
 }
+
+
+.image{
+  max-width: 100%;
+  height: auto;
+  
+}

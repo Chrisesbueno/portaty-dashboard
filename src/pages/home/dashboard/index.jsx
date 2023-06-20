@@ -3,120 +3,191 @@ import Menu from "@/components/Menu";
 import styles from "@/styles/Dashboard.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from 'next/image'
 import { Button, Stack } from "@mui/material";
-import Card from "@/components/Card";
-import StoreIcon from "@mui/icons-material/Store";
-import AirportShuttleIcon from "@mui/icons-material/AirportShuttle";
+
 import AddIcon from "@mui/icons-material/Add";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+
 import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
-import { TextField } from '@mui/material';
+import { TextField, Grid } from '@mui/material';
+
+import { writeFile, utils } from 'xlsx'
 // amplify 
-import { Auth, API, graphqlOperation, Storage } from 'aws-amplify'
-import { listADCategories, listADBrands, listADProducts } from '@/graphql/queries'
-import { onCreateADCategory, onCreateADProduct, onCreateADBrand } from '@/graphql/subscriptions'
-import TableProducts from "@/components/TableProducts";
+import { Auth, API, graphqlOperation } from 'aws-amplify'
+import { customListADCategories, customListADBrands, customListADProducts } from '@/graphql/customQueries'
 
-const TablesInformation = ({ title, information }) => {
-  console.log("INFORMATION: ", information)
-  // search 
-  const [searchId, setSearchId] = useState('');
+import TableGrid from "@/components/TableProducts";
+
+
+
+
+const Table = ({ title, data = [] }) => {
+
   const [searchName, setSearchName] = useState('');
-  const [searchDescription, setSearchDescription] = useState('');
+  const [searchID, setSearchID] = useState('');
+  const [searchAbbr, setSearchAbbr] = useState('');
 
-  // function search 
-  const handleSearchIdChange = (event) => {
-    setSearchId(event.target.value);
-  };
 
-  const handleSearchNameChange = (event) => {
-    setSearchName(event.target.value);
-  };
-
-  const handleSearchDescriptionChange = (event) => {
-    setSearchDescription(event.target.value);
-  };
-  const filteredProducts = () => {
-    if (!information.length > 0) return
-    return information.filter((product) =>
-      product.id.toString().includes(searchId) &&
-      product.name.toLowerCase().includes(searchName.toLowerCase()) &&
-      product.description.toLowerCase().includes(searchDescription.toLowerCase())
-    );
-
-  }
+  const filteredData = data.filter((item) =>
+    item.id.toString().includes(searchID) &&
+    item.name.toLowerCase().includes(searchName.toLowerCase()) &&
+    item.image && item.abreviation.toLowerCase().includes(searchAbbr.toLocaleLowerCase())
+  );
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'id', headerName: 'ID', width: 100 },
+    { field: 'name', headerName: 'Nombre', width: 150 },
     {
-      field: 'name',
-      headerName: 'Name',
+      field: 'image',
+      headerName: 'Imagen',
       width: 150,
-      editable: true,
+      renderCell: (params) => (<CustomImageColumn value={params.value} />),
     },
+    { field: 'abreviation', headerName: 'Abreviacion', width: 150 },
     {
-      field: 'images',
-      headerName: 'Images',
-      width: 110,
-      renderCell: (params) => {
-        return (
-          <Stack>
-            <img src="" alt="" />
-          </Stack>
-        );
-      }
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 110,
-      renderCell: (params) => {
-        return (
-          <Stack>
-            <button>{params.value.eliminated}</button>
-          </Stack>
-        );
-      }
-    },
-  ];
+      // field: 'actions',
+      // headerName: 'Actiones',
+      // width: 110,
+      // renderCell: (params) => {
+      //   return (
+      //     <Stack>
+      //       <IconButton aria-label="delete" color="error">
+      //         <DeleteIcon />
+      //       </IconButton>
+      //     </Stack>
 
-  const rows = [
-    { id: 1, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 2, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 3, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 4, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 5, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 6, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
-    { id: 7, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
+
+      //   );
+      // }
+    },
   ];
 
   return (
 
     <div>
       <h3>{title}</h3>
-      <TextField
-        label="Buscar por ID"
-        value={searchId}
-        onChange={handleSearchIdChange}
-      />
-      <TextField
-        label="Buscar por nombre"
-        value={searchName}
-        onChange={handleSearchNameChange}
-      />
-      <TextField
-        label="Buscar por imagen"
-        value={searchDescription}
-        onChange={handleSearchDescriptionChange}
-      />
+      <Grid container justifyContent="start" spacing={1}>
+        <Grid item >
+          <TextField
+            label="Buscar por ID"
+            value={searchID}
+            onChange={(e) => setSearchID(e.target.value)}
+          />
+        </Grid>
+        <Grid item >
+          <TextField
+            label="Buscar por nombre"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+        </Grid>
+        <Grid item >
+          <TextField
+            label="Buscar por Abreviacion"
+            value={searchAbbr}
+            onChange={(e) => setSearchAbbr(e.target.value)}
+          />
+        </Grid>
+      </Grid >
 
-     <TableProducts columns={columns} rows={rows} />
+
+      <TableGrid columns={columns} rows={filteredData} />
     </div>
 
   )
 }
+
+const CustomImageColumn = ({ value }) => {
+
+  return (
+    <>
+      {
+        typeof value === "string" ?
+          <Grid container justifyContent="start" spacing={1}>
+            <Grid item >
+              <Image
+                src={value}
+                width={50}
+                height={50}
+                alt={"ALT"}
+              />
+            </Grid>
+          </Grid >
+          :
+          <Grid container justifyContent="start" spacing={1}>
+            {
+
+              value.map((image, index) => (
+                <Grid item key={index}>
+                  <Image
+                    src={image}
+                    width={50}
+                    height={50}
+                    alt={`Image ${index + 1}`}
+                    key={`image-${index + 1}`}
+                  />
+                </Grid>
+              ))
+            }
+          </Grid >
+      }
+    </>
+
+
+  );
+};
+
+const ProductsTable = ({ title, data = [] }) => {
+  const [searchName, setSearchName] = useState('');
+  const [searchID, setSearchID] = useState('');
+
+  const filteredData = data.filter((item) =>
+    item.id.toString().includes(searchID) &&
+    item.name.toLowerCase().includes(searchName.toLowerCase()) &&
+    item.images
+  );
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 50 },
+    { field: 'name', headerName: 'Nombre', width: 200 },
+    {
+      field: 'images',
+      headerName: 'Imagenes',
+      width: 200,
+      renderCell: (params) => (<CustomImageColumn value={params.value} />),
+    },
+  ];
+
+
+
+  return (
+    <div>
+      <h3>{title}</h3>
+      <Grid container justifyContent="start" spacing={1}>
+        <Grid item >
+          <TextField
+            label="Buscar por ID"
+            value={searchID}
+            onChange={(e) => setSearchID(e.target.value)}
+          />
+        </Grid>
+        <Grid item >
+          <TextField
+            label="Buscar por nombre"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+        </Grid>
+      </Grid >
+      <TableGrid columns={columns} rows={filteredData} />
+    </div>
+
+  )
+}
+
+
 
 const Dashboard = () => {
   const router = useRouter();
@@ -131,39 +202,91 @@ const Dashboard = () => {
   const [products, setProducts] = useState([])
 
   const fecthShop = async () => {
-    const listCategories = await API.graphql(graphqlOperation(listADCategories));
-    const listBrands = await API.graphql(graphqlOperation(listADBrands));
-    const listProducts = await API.graphql(graphqlOperation(listADProducts));
-    console.log('categories', listCategories)
-    console.log('brands', listBrands)
-    console.log('products', listProducts)
+    const dataCategories = await API.graphql(graphqlOperation(customListADCategories))
+    const dataBrands = await API.graphql(graphqlOperation(customListADBrands));
+    const dataProducts = await API.graphql(graphqlOperation(customListADProducts));
+
+    setCategories(dataCategories)
+    setBrands(dataBrands)
+    setProducts(dataProducts)
   };
 
   useEffect(() => {
-    fecthShop()
-    const susbcriptionCategory = API.graphql(graphqlOperation(onCreateADCategory)).subscribe({
-      next: (event) => {
-        // console.log(event)
-      },
-      error: (error) => {
-        console.error('Error al suscribirse a los cambios:', error);
-      }
-    })
+    if (!openCategories && !openBrands && !openProducts) fecthShop();
+  }, [openCategories, openBrands, openProducts])
 
-    return () => {
-      susbcriptionCategory.unsubscribe()
+
+
+  const obtenerMarcas = () => {
+    const url = 'https://mobile-phones2.p.rapidapi.com/brands';
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9d306625c7mshcfa5d06d7dcf07fp134c5cjsne107bbad8201',
+        'X-RapidAPI-Host': 'mobile-phones2.p.rapidapi.com'
+      }
+    };
+
+    fetch(url, options)
+      .then((result) => {
+        result.json().then(async (r) => {
+          console.log("MARCAS: ", r)
+          // const resultPromise = await Promise.all(r.map(async (marca, index) => {
+          //   const result = await obtenerTelefonoMarca(marca.id)
+          //   return result
+          // }))
+
+
+        })
+      })
+      .catch((e) => console.error(e))
+  }
+
+
+  const obtenerTelefonoMarca = async (marcaID) => {
+    const url = `https://mobile-phones2.p.rapidapi.com/${marcaID}/phones`;
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9d306625c7mshcfa5d06d7dcf07fp134c5cjsne107bbad8201',
+        'X-RapidAPI-Host': 'mobile-phones2.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const result = await fetch(url, options);
+      const response = await result.json();
+      console.log("DATA: 48: ", response.data)
+      return response.data;
+    } catch (error) {
+      console.log("ERROR: en busca de telefonos: ", error)
+      return null
     }
 
-    const checkUser = async () => {
-      try {
-        const user = await Auth.currentAuthenticatedUser();
+    // fetch(url, options)
+    //   .then((result) => {
+    //     result.json().then(r => descargarArchivoExcel(r.data, `TLF:${marcaID}`))
+    //   })
+    //   .catch((e) => console.error(e))
+  }
 
-      } catch (error) {
-        router.push({ pathname: `/` })
-      }
-    }
-    checkUser();
-  }, [router])
+  // Función para descargar el archivo Excel
+  const descargarArchivoExcel = (data, title) => {
+    // Crear un nuevo libro de Excel
+    const workbook = utils.book_new();
+
+    // Convertir el objeto JSON a una matriz de hojas de cálculo
+    const worksheetData = utils.json_to_sheet(data);
+
+    // Añadir la hoja de cálculo al libro de Excel
+    utils.book_append_sheet(workbook, worksheetData, 'Datos');
+
+    // Escribir el libro de Excel en un archivo
+    writeFile(workbook, `${title}.xlsx`);
+  };
+
+
+
 
   return (
     <div className={styles.content}>
@@ -180,36 +303,36 @@ const Dashboard = () => {
               variant="contained"
               size="large"
               onClick={() => setOpenCategories(true)}
-              startIcon={<StoreIcon />}
+              // startIcon={<StoreIcon />}
               endIcon={<AddIcon />}
             >
-              Add new category
+              Agg Categoria
             </Button>
             <Button
               variant="contained"
               size="large"
               onClick={() => setOpenBrands(true)}
-              startIcon={<AirportShuttleIcon />}
+              // startIcon={<AirportShuttleIcon />}
               endIcon={<AddIcon />}
             >
-              Add new brand
+              Agg Marca
             </Button>
             <Button
               variant="contained"
               size="large"
               onClick={() => setOpenProducts(true)}
-              startIcon={<ConfirmationNumberIcon />}
+              // startIcon={<ConfirmationNumberIcon />}
               endIcon={<AddIcon />}
             >
-              Add new product
+              Agg Producto
             </Button>
             <ModalCategories open={openCategories} close={() => setOpenCategories(false)} />
             <ModalBrands open={openBrands} close={() => setOpenBrands(false)} />
             <ModalProducts open={openProducts} close={() => setOpenProducts(false)} />
           </div>
-          <TablesInformation title={"Categoria"} information={categories} />
-          <TablesInformation title={"Marcas"} information={brands} />
-          <TablesInformation title={"Productos"} information={products} />
+          <Table title={"Categoria"} data={categories?.data?.listADCategories?.items} />
+          <Table title={"Marcas"} data={brands?.data?.listADBrands?.items} />
+          <ProductsTable title={"Productos"} data={products?.data?.listADProducts?.items} />
         </div>
 
         <Button

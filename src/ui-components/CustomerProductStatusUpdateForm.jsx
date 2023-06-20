@@ -177,6 +177,11 @@ export default function CustomerProductStatusUpdateForm(props) {
           value="UNPUBLISHED"
           {...getOverrideProps(overrides, "statusoption2")}
         ></option>
+        <option
+          children="Sold"
+          value="SOLD"
+          {...getOverrideProps(overrides, "statusoption3")}
+        ></option>
       </SelectField>
       <TextField
         label="Owner"

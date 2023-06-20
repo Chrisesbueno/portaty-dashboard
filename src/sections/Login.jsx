@@ -37,15 +37,6 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        await Auth.currentAuthenticatedUser();
-        router.push({ pathname: `/` })
-      } catch (error) {
-        console.log("Nadie lOgeado")
-      }
-    }
-    checkUser()
     clear();
   }, [])
   useEffect(() => {
@@ -61,12 +52,10 @@ const Login = () => {
   }
 
   const onHandleSubmit = async () => {
-    console.log("EMAIL: ", email)
-    console.log("PASS: ", password)
     setIsLoading(true)
     try {
       const user = await Auth.signIn(email, password)
-      console.log("USER: ", user)
+
       if (user.challengeName === 'NEW_PASSWORD_REQUIRED') {
         setUserChangePwd(user);
         setIsNewPassword(true)
@@ -82,7 +71,6 @@ const Login = () => {
     setIsLoading(true)
     try {
       const result = await Auth.completeNewPassword(userChangePwd, newPassword)
-      console.log("Result New: ", result)
       setIsNewPassword(false)
     } catch (error) {
       console.error(error);

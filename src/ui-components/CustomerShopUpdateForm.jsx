@@ -28,6 +28,7 @@ export default function CustomerShopUpdateForm(props) {
     name: "",
     email: "",
     description: "",
+    identityId: "",
     owner: "",
   };
   const [userID, setUserID] = React.useState(initialValues.userID);
@@ -36,6 +37,7 @@ export default function CustomerShopUpdateForm(props) {
   const [description, setDescription] = React.useState(
     initialValues.description
   );
+  const [identityId, setIdentityId] = React.useState(initialValues.identityId);
   const [owner, setOwner] = React.useState(initialValues.owner);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
@@ -46,6 +48,7 @@ export default function CustomerShopUpdateForm(props) {
     setName(cleanValues.name);
     setEmail(cleanValues.email);
     setDescription(cleanValues.description);
+    setIdentityId(cleanValues.identityId);
     setOwner(cleanValues.owner);
     setErrors({});
   };
@@ -64,9 +67,10 @@ export default function CustomerShopUpdateForm(props) {
   React.useEffect(resetStateValues, [customerShopRecord]);
   const validations = {
     userID: [{ type: "Required" }],
-    name: [{ type: "Required" }],
-    email: [{ type: "Required" }],
+    name: [],
+    email: [],
     description: [],
+    identityId: [],
     owner: [],
   };
   const runValidationTasks = async (
@@ -99,6 +103,7 @@ export default function CustomerShopUpdateForm(props) {
           name,
           email,
           description,
+          identityId,
           owner,
         };
         const validationResponses = await Promise.all(
@@ -159,6 +164,7 @@ export default function CustomerShopUpdateForm(props) {
               name,
               email,
               description,
+              identityId,
               owner,
             };
             const result = onChange(modelFields);
@@ -176,7 +182,7 @@ export default function CustomerShopUpdateForm(props) {
       ></TextField>
       <TextField
         label="Name"
-        isRequired={true}
+        isRequired={false}
         isReadOnly={false}
         value={name}
         onChange={(e) => {
@@ -187,6 +193,7 @@ export default function CustomerShopUpdateForm(props) {
               name: value,
               email,
               description,
+              identityId,
               owner,
             };
             const result = onChange(modelFields);
@@ -204,7 +211,7 @@ export default function CustomerShopUpdateForm(props) {
       ></TextField>
       <TextField
         label="Email"
-        isRequired={true}
+        isRequired={false}
         isReadOnly={false}
         value={email}
         onChange={(e) => {
@@ -215,6 +222,7 @@ export default function CustomerShopUpdateForm(props) {
               name,
               email: value,
               description,
+              identityId,
               owner,
             };
             const result = onChange(modelFields);
@@ -243,6 +251,7 @@ export default function CustomerShopUpdateForm(props) {
               name,
               email,
               description: value,
+              identityId,
               owner,
             };
             const result = onChange(modelFields);
@@ -259,6 +268,35 @@ export default function CustomerShopUpdateForm(props) {
         {...getOverrideProps(overrides, "description")}
       ></TextField>
       <TextField
+        label="Identity id"
+        isRequired={false}
+        isReadOnly={false}
+        value={identityId}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              userID,
+              name,
+              email,
+              description,
+              identityId: value,
+              owner,
+            };
+            const result = onChange(modelFields);
+            value = result?.identityId ?? value;
+          }
+          if (errors.identityId?.hasError) {
+            runValidationTasks("identityId", value);
+          }
+          setIdentityId(value);
+        }}
+        onBlur={() => runValidationTasks("identityId", identityId)}
+        errorMessage={errors.identityId?.errorMessage}
+        hasError={errors.identityId?.hasError}
+        {...getOverrideProps(overrides, "identityId")}
+      ></TextField>
+      <TextField
         label="Owner"
         isRequired={false}
         isReadOnly={false}
@@ -271,6 +309,7 @@ export default function CustomerShopUpdateForm(props) {
               name,
               email,
               description,
+              identityId,
               owner: value,
             };
             const result = onChange(modelFields);
