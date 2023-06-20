@@ -92,6 +92,23 @@ const TablesInformation = ({ title, information }) => {
     { id: 7, name: 'Redmi Note 10', actions: {eliminated: 'Eliminated'}},
   ];
 
+  const url = 'https://mobile-phones2.p.rapidapi.com/48/phones';
+const options = {
+	method: 'GET',
+	headers: {
+		'X-RapidAPI-Key': '9d306625c7mshcfa5d06d7dcf07fp134c5cjsne107bbad8201',
+		'X-RapidAPI-Host': 'mobile-phones2.p.rapidapi.com'
+	}
+};
+
+try {
+	const response = await fetch(url, options);
+	const result = await response.text();
+	console.log(result);
+} catch (error) {
+	console.error(error);
+}
+
   return (
 
     <div>
