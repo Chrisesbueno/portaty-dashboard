@@ -3,21 +3,18 @@ import Menu from "@/components/Menu";
 import styles from "@/styles/Dashboard.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import Image from 'next/image'
-import { Button, Stack } from "@mui/material";
-
+import Image from "next/image";
+import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-
 import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
 import { TextField, Grid } from '@mui/material';
-
 import { writeFile, utils } from 'xlsx'
+
 // amplify 
 import { Auth, API, graphqlOperation } from 'aws-amplify'
 import { customListADCategories, customListADBrands, customListADProducts } from '@/graphql/customQueries'
-
 import TableGrid from "@/components/TableProducts";
 
 
@@ -93,9 +90,9 @@ const CustomImageColumn = ({ value }) => {
             <Grid item >
               <Image
                 src={value}
+                alt="Image"
                 width={50}
                 height={50}
-                alt={"ALT"}
               />
             </Grid>
           </Grid >
@@ -107,9 +104,9 @@ const CustomImageColumn = ({ value }) => {
                 <Grid item key={index}>
                   <Image
                     src={image}
+                    alt={`Image-${index + 1}`}
                     width={50}
                     height={50}
-                    alt={`Image ${index + 1}`}
                   />
                 </Grid>
               ))
@@ -327,9 +324,9 @@ const Dashboard = () => {
         </Button>
         <Image
           src={"https:portaty-storage165121-dev.s3.us-east-1.amazonaws.com/public/app/images/brands/XIAOMI.image"}
+          alt={"EJELE"}
           width={50}
           height={50}
-          alt={"ALT"}
         />
       </div>
     </div>
