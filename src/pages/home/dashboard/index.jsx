@@ -43,7 +43,7 @@ const Table = ({ title, data = [] }) => {
       field: 'image',
       headerName: 'Imagen',
       width: 150,
-      renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
+      // renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
     },
     { field: 'abreviation', headerName: 'Abreviacion', width: 150 },
   ];
@@ -110,7 +110,6 @@ const CustomImageColumn = ({ value }) => {
                     width={50}
                     height={50}
                     alt={`Image ${index + 1}`}
-                    key={`image-${index + 1}`}
                   />
                 </Grid>
               ))
