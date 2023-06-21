@@ -322,6 +322,12 @@ const Dashboard = () => {
         >
           Cerrar Sesion
         </Button>
+        <Image
+          src={"https://s3bybus220215-dev.s3.amazonaws.com/public/footerLogo.png"}
+          alt={"EJELE"}
+          width={50}
+          height={50}
+        />
       </div>
     </div>
   );
