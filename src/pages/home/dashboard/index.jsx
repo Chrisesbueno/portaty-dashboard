@@ -43,25 +43,9 @@ const Table = ({ title, data = [] }) => {
       field: 'image',
       headerName: 'Imagen',
       width: 150,
-      renderCell: (params) => (<CustomImageColumn value={params.value} />),
+      renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
     },
     { field: 'abreviation', headerName: 'Abreviacion', width: 150 },
-    {
-      // field: 'actions',
-      // headerName: 'Actiones',
-      // width: 110,
-      // renderCell: (params) => {
-      //   return (
-      //     <Stack>
-      //       <IconButton aria-label="delete" color="error">
-      //         <DeleteIcon />
-      //       </IconButton>
-      //     </Stack>
-
-
-      //   );
-      // }
-    },
   ];
 
   return (
@@ -156,7 +140,7 @@ const ProductsTable = ({ title, data = [] }) => {
       field: 'images',
       headerName: 'Imagenes',
       width: 200,
-      renderCell: (params) => (<CustomImageColumn value={params.value} />),
+      renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
     },
   ];
 

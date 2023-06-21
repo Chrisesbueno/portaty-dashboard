@@ -1,6 +1,6 @@
 // Amplify ---------------
 import { Amplify } from 'aws-amplify';
-import awsExports from '../aws-exports';
+import awsExports from '@/aws-exports';
 
 
 import { useEffect, useState } from 'react'
@@ -42,6 +42,7 @@ const theme = createTheme({
 
 
 Amplify.configure({ ...awsExports, ssr: true });
+
 const App = ({ Component, pageProps }) => {
   const [isUserAuth, setIsUserAuth] = useState(false)
   const router = useRouter();
@@ -53,10 +54,8 @@ const App = ({ Component, pageProps }) => {
       switch (event) {
         case "signIn":
           checkUser();
-
           break;
         case "signIn_failure":
-
           break;
         case "signOut":
           router.push({ pathname: `/` })
@@ -101,9 +100,8 @@ const App = ({ Component, pageProps }) => {
       <MenuProvider>
         <ThemeProvider theme={theme}>
           <RecoilRoot>
-            {
-              true && <Component {...pageProps} />
-            }
+          <Component {...pageProps} />
+
           </RecoilRoot>
         </ThemeProvider>
       </MenuProvider>
