@@ -84,7 +84,7 @@ const Table = ({ title, data = [] }) => {
 }
 
 const CustomImageColumn = ({ value }) => {
-
+  console.log("VALUE: ", value)
   return (
     <>
       {
@@ -325,6 +325,12 @@ const Dashboard = () => {
         >
           Cerrar Sesion
         </Button>
+        <Image
+          src={"https:portaty-storage165121-dev.s3.us-east-1.amazonaws.com/public/app/images/brands/XIAOMI.image"}
+          width={50}
+          height={50}
+          alt={"ALT"}
+        />
       </div>
     </div>
   );
