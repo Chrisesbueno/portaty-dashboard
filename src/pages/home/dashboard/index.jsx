@@ -4,7 +4,7 @@ import styles from "@/styles/Dashboard.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from 'next/image'
-import { Button } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 
@@ -126,6 +126,7 @@ const CustomImageColumn = ({ value }) => {
                     width={50}
                     height={50}
                     alt={`Image ${index + 1}`}
+                    key={`image-${index + 1}`}
                   />
                 </Grid>
               ))
@@ -330,8 +331,8 @@ const Dashboard = () => {
             <ModalProducts open={openProducts} close={() => setOpenProducts(false)} />
           </div>
           <Table title={"Categoria"} data={categories?.data?.listADCategories?.items} />
-          {/* <Table title={"Marcas"} data={brands?.data?.listADBrands?.items} /> */}
-          {/* <ProductsTable title={"Productos"} data={products?.data?.listADProducts?.items} /> */}
+          <Table title={"Marcas"} data={brands?.data?.listADBrands?.items} />
+          <ProductsTable title={"Productos"} data={products?.data?.listADProducts?.items} />
         </div>
 
         <Button
