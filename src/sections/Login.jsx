@@ -161,7 +161,7 @@ const Login = () => {
           {
             !isNewPassword ?
               <Button color="primary" variant="contained" fullWidth size="large" onClick={onHandleSubmit} disabled={isLoading ? true : false}>
-                {isLoading ? <CircularProgress /> : "Connect"}
+                {isLoading ? <CircularProgress /> : "Conectar"}
               </Button>
               :
               <Button color="primary" variant="contained" fullWidth size="large" onClick={onHandleNewPassword} disabled={isLoading ? true : false}>
