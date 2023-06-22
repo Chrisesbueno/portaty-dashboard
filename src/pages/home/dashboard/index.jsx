@@ -323,7 +323,7 @@ const Dashboard = () => {
           Cerrar Sesion
         </Button>
         <Image
-          src={"https://s3bybus220215-dev.s3.amazonaws.com/public/footerLogo.png"}
+          src={"https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/brands/SAMSUNG.image"}
           alt={"EJELE"}
           width={50}
           height={50}

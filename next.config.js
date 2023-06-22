@@ -2,7 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    unoptimized: true,
+    domains: ['portaty-storage165121-dev.s3.amazonaws.com'],
+    loader: 'default',
+    path: '',
+    exclude: [
+      'https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/brands/**',
+      'https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/categories/**',
+      'https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/products/**'
+    ],
   },
 }
 
