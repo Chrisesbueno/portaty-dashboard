@@ -10,6 +10,7 @@ const nextConfig = {
       'https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/categories/**',
       'https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/products/**'
     ],
+    unoptimized: true
   },
 }
 
