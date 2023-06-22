@@ -40,7 +40,7 @@ const Table = ({ title, data = [] }) => {
       field: 'image',
       headerName: 'Imagen',
       width: 150,
-      // renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
+      renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
     },
     { field: 'abreviation', headerName: 'Abreviacion', width: 150 },
   ];
@@ -93,6 +93,7 @@ const CustomImageColumn = ({ value }) => {
                 alt="Image"
                 width={50}
                 height={50}
+                unoptimized
               />
             </Grid>
           </Grid >
@@ -107,6 +108,7 @@ const CustomImageColumn = ({ value }) => {
                     alt={`Image-${index + 1}`}
                     width={50}
                     height={50}
+                    unoptimized
                   />
                 </Grid>
               ))
@@ -323,7 +325,8 @@ const Dashboard = () => {
           Cerrar Sesion
         </Button>
         <Image
-          src={"https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/brands/SAMSUNG.image"}
+        
+          src={"https://portaty-storage165121-dev.s3.us-east-1.amazonaws.com/public/app/images//brands/SAMSUNG.image"}
           alt={"EJELE"}
           width={50}
           height={50}
