@@ -4,14 +4,6 @@ const nextConfig = {
   images: {
     domains: ["portaty-storage165121-dev.s3.us-east-1.amazonaws.com"],
     unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'portaty-storage165121-dev.s3.us-east-1.amazonaws.com',
-        port: '',
-        pathname: '/public/**',
-      },
-    ],
   },
 }
 
