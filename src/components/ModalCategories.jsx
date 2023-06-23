@@ -31,7 +31,7 @@ export default function ModalCategories({ open, close }) {
       // subir imagen 
       const key = await uploadImage(name, file)
       // obtener url
-      const url = `https:${bucketName}.s3.${region}.amazonaws.com/public/${key}`
+      const url = `https://${bucketName}.s3.${region}.amazonaws.com/public/${key}`
       const params = {
         input: {
           name: name.trim(),

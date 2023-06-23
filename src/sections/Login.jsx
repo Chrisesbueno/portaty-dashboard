@@ -85,7 +85,7 @@ const Login = () => {
       <div className={styles.content}>
         <div className={styles.title}>
           <Image
-            src={"https://portaty-storage165121-dev.s3.us-east-1.amazonaws.com/public/app/images//brands/SAMSUNG.image"}
+            src={"https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/brands/SAMSUNG.image"}
             alt={"EJELE"}
             width={50}
             height={50}
