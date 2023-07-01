@@ -11,11 +11,11 @@ const TableProducts = ({rows, columns}) => {
         initialState={{
           pagination: {
             paginationModel: {
-              pageSize: 10,
+              pageSize: 5,
             },
           },
         }}
-        pageSizeOptions={[10]}
+        pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: GridToolbar }}

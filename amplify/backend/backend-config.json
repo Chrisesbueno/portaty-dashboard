@@ -15,6 +15,16 @@
           "additionalAuthenticationProviders": [
             {
               "authenticationType": "AWS_IAM"
+            },
+            {
+              "authenticationType": "OPENID_CONNECT",
+              "openIDConnectConfig": {
+                "authTTL": "3600000",
+                "clientId": "959689221062-gscr0nvkcbn73k65fnh4liupca4bc8sr.apps.googleusercontent.com",
+                "iatTTL": "3600000",
+                "issuerUrl": "https://accounts.google.com/o/oauth2/auth/",
+                "name": "google"
+              }
             }
           ],
           "defaultAuthentication": {
@@ -39,19 +49,16 @@
           "SMS"
         ],
         "passwordProtectionSettings": {
-          "passwordPolicyCharacters": [
-            "REQUIRES_LOWERCASE",
-            "REQUIRES_NUMBERS",
-            "REQUIRES_SYMBOLS",
-            "REQUIRES_UPPERCASE"
-          ],
+          "passwordPolicyCharacters": [],
           "passwordPolicyMinLength": 8
         },
         "signupAttributes": [
           "EMAIL",
           "NAME"
         ],
-        "socialProviders": [],
+        "socialProviders": [
+          "GOOGLE"
+        ],
         "usernameAttributes": [
           "EMAIL"
         ],

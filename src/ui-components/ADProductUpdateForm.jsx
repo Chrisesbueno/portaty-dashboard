@@ -242,7 +242,7 @@ export default function ADProductUpdateForm(props) {
   const [currentPathsValue, setCurrentPathsValue] = React.useState("");
   const pathsRef = React.createRef();
   const validations = {
-    name: [{ type: "Required" }],
+    name: [],
     images: [],
     paths: [],
     description: [],
@@ -329,7 +329,7 @@ export default function ADProductUpdateForm(props) {
     >
       <TextField
         label="Name"
-        isRequired={true}
+        isRequired={false}
         isReadOnly={false}
         value={name}
         onChange={(e) => {

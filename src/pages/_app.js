@@ -1,5 +1,8 @@
 // Amplify ---------------
-import "./amplify.js"
+import { Amplify } from 'aws-amplify';
+import awsExports from '../aws-exports';
+
+
 import { useEffect, useState } from 'react'
 import { Hub, Auth } from 'aws-amplify'
 
@@ -38,7 +41,7 @@ const theme = createTheme({
 });
 
 
-
+Amplify.configure({ ...awsExports, ssr: true });
 const App = ({ Component, pageProps }) => {
   const [isUserAuth, setIsUserAuth] = useState(false)
   const router = useRouter();
@@ -64,21 +67,17 @@ const App = ({ Component, pageProps }) => {
 
     });
     checkUser();
-    console.log("Router: ", router)
     return unsubscribe;
   }, [])
 
   const checkUser = async () => {
     try {
       const user = await Auth.currentAuthenticatedUser();
-      console.log("USER: ", user)
-      console.log(user?.signInUserSession.accessToken.payload['cognito:groups'])
+
       if (user?.signInUserSession.accessToken.payload['cognito:groups'] === undefined) return
-      console.log("aqui estoy")
       const userGroups = user.signInUserSession.accessToken.payload['cognito:groups'];
 
       if (userGroups.includes('admin')) {
-        console.log("ERES ADMIN")
         router.push({ pathname: `/home/dashboard` })
       } else {
 

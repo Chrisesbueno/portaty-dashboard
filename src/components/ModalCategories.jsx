@@ -7,15 +7,11 @@ import { useState } from "react";
 import { Auth, API, graphqlOperation, Storage } from 'aws-amplify'
 import { createADCategory } from '@/graphql/mutations'
 
-
 export default function ModalCategories({ open, close }) {
   const [name, setName] = useState("");
   const [file, setFile] = useState("");
   const [abbr, setAbbr] = useState("");
   const [isLoading, setIsLoading] = useState(false)
-
-
-
 
   const onHandleRegister = async () => {
     console.log("Nombre: ", name)

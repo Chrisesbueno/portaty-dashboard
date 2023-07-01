@@ -18,6 +18,7 @@ export declare type CustomerShopUpdateFormInputValues = {
     name?: string;
     email?: string;
     description?: string;
+    identityId?: string;
     owner?: string;
 };
 export declare type CustomerShopUpdateFormValidationValues = {
@@ -25,6 +26,7 @@ export declare type CustomerShopUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
     email?: ValidationFunction<string>;
     description?: ValidationFunction<string>;
+    identityId?: ValidationFunction<string>;
     owner?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
@@ -34,6 +36,7 @@ export declare type CustomerShopUpdateFormOverridesProps = {
     name?: PrimitiveOverrideProps<TextFieldProps>;
     email?: PrimitiveOverrideProps<TextFieldProps>;
     description?: PrimitiveOverrideProps<TextFieldProps>;
+    identityId?: PrimitiveOverrideProps<TextFieldProps>;
     owner?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type CustomerShopUpdateFormProps = React.PropsWithChildren<{
