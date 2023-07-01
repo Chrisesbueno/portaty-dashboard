@@ -14,6 +14,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import Image from "next/image";
 import { menu } from "@/constants";
 import { useRouter } from "next/navigation";
@@ -25,6 +26,7 @@ const Menu = () => {
   const [openShops, setOpenShops] = useState(true);
   const [openUsers, setOpenUsers] = useState(true);
   const [openProducts, setOpenProducts] = useState(true);
+  const [openNotifications, setOpenNotifications] = useState(true);
 
   const handleProducts = () => {
     setOpenUsers(!openProducts);
@@ -34,6 +36,9 @@ const Menu = () => {
   };
   const handleUsers = () => {
     setOpenUsers(!openUsers);
+  };
+  const handleNotifications = () => {
+    setOpenNotifications(!openNotifications);
   };
 
   return (
@@ -78,7 +83,9 @@ const Menu = () => {
           <ListItemIcon>
             <StoreIcon />
           </ListItemIcon>
-          <ListItemText primary="Shops" />
+          <ListItemText sx={{
+            marginLeft: -3 
+          }}   primary="Shops" />
           {openShops ? <ExpandLessIcon sx={{ color: 'rgba(0, 0, 0, 0.54)'}} /> : <ExpandMoreIcon sx={{ color: 'rgba(0, 0, 0, 0.54)'}}/>}
         </ListItemButton>
         <Collapse in={openShops} timeout="auto" unmountOnExit>
@@ -89,9 +96,9 @@ const Menu = () => {
             <ListItemButton
               sx={{
                 pl: 4,
-                width: "95%",
+                width: "81%",
                 position: "relative",
-                right: "-5%",
+                right: "-19%",
                 borderTopLeftRadius: "7px",
                 borderBottomLeftRadius: "7px",
               }}
@@ -115,7 +122,9 @@ const Menu = () => {
           <ListItemIcon>
             <PeopleIcon />
           </ListItemIcon>
-          <ListItemText primary="Users" />
+          <ListItemText sx={{
+            marginLeft: -3 
+          }} primary="Users" />
           {openUsers ? <ExpandLessIcon sx={{ color: 'rgba(0, 0, 0, 0.54)'}}/> : <ExpandMoreIcon sx={{ color: 'rgba(0, 0, 0, 0.54)'}}/>}
         </ListItemButton>
         <Collapse in={openUsers} timeout="auto" unmountOnExit>
@@ -127,9 +136,9 @@ const Menu = () => {
             <ListItemButton
               sx={{
                 pl: 4,
-                width: "95%",
+                width: "81%",
                 position: "relative",
-                right: "-5%",
+                right: "-19%",
                 borderTopLeftRadius: "7px",
                 borderBottomLeftRadius: "7px",
               }}
@@ -146,20 +155,63 @@ const Menu = () => {
           </List>
         </Collapse>
         <Divider sx={{ bgcolor: "rgba(0, 0, 0, 0.04)" }} />
+        
+
+        <ListItemButton onClick={handleNotifications}>
+          <ListItemIcon>
+            <NotificationsIcon />
+          </ListItemIcon>
+          <ListItemText sx={{
+            marginLeft: -3 
+          }} primary="Notifications" />
+          {openNotifications ? <ExpandLessIcon sx={{ color: 'rgba(0, 0, 0, 0.54)'}}/> : <ExpandMoreIcon sx={{ color: 'rgba(0, 0, 0, 0.54)'}}/>}
+        </ListItemButton>
+        <Collapse in={openNotifications} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <Divider
+              sx={{ width: "93%", position: "relative", right: "-7%" }}
+            />
+
+            <ListItemButton
+              sx={{
+                pl: 4,
+                width: "81%",
+                position: "relative",
+                right: "-19%",
+                borderTopLeftRadius: "7px",
+                borderBottomLeftRadius: "7px",
+              }}
+              selected={selectedIndex === 7}
+              onClick={(e) => {
+                e.preventDefault;
+                router.push(`/home/notifications/panel`);
+                updateIndex(7);
+                console.log(selectedIndex);
+              }}
+            >
+              <ListItemText primary="Panel" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+        <Divider sx={{ bgcolor: "rgba(0, 0, 0, 0.04)" }} />
+
+
         <ListItemButton
           sx={{ borderBottomLeftRadius: "7px", borderBottomRightRadius: "7px" }}
-          selected={selectedIndex === 6}
+          selected={selectedIndex === 8}
           onClick={(e) => {
             e.preventDefault;
             router.push("/home/configuration");
-            updateIndex(6);
+            updateIndex(8);
             console.log(selectedIndex);
           }}
         >
           <ListItemIcon>
-            <SettingsIcon sx={{ color: selectedIndex === 6 ? 'white' : 'rgba(0, 0, 0, 0.54)' }}/>
+            <SettingsIcon sx={{ color: selectedIndex === 8 ? 'white' : 'rgba(0, 0, 0, 0.54)' }}/>
           </ListItemIcon>
-          <ListItemText primary="Configuration" />
+          <ListItemText sx={{
+            marginLeft: -3 
+          }} primary="Configuration" />
         </ListItemButton>
       </List>
       <div className={styles.panel}>
