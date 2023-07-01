@@ -171,7 +171,7 @@ export default function ModalProducts({ open, close }) {
     const region = Storage._config.AWSS3.region;
     try {
       const urlPromises = paths.map(async (path) => {
-        const url = `https:${bucketName}.s3.${region}.amazonaws.com/public/${path}`
+        const url = `https://${bucketName}.s3.${region}.amazonaws.com/public/${path}`
         return url;
       });
 

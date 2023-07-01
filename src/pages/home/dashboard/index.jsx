@@ -3,21 +3,18 @@ import Menu from "@/components/Menu";
 import styles from "@/styles/Dashboard.module.css";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import Image from 'next/image'
-import { Button, Stack } from "@mui/material";
-
+import Image from "next/image";
+import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-
 import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
 import { TextField, Grid } from '@mui/material';
-
 import { writeFile, utils } from 'xlsx'
+
 // amplify 
 import { Auth, API, graphqlOperation } from 'aws-amplify'
 import { customListADCategories, customListADBrands, customListADProducts } from '@/graphql/customQueries'
-
 import TableGrid from "@/components/TableProducts";
 
 
@@ -43,25 +40,9 @@ const Table = ({ title, data = [] }) => {
       field: 'image',
       headerName: 'Imagen',
       width: 150,
-      renderCell: (params) => (<CustomImageColumn value={params.value} />),
+      renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
     },
     { field: 'abreviation', headerName: 'Abreviacion', width: 150 },
-    {
-      // field: 'actions',
-      // headerName: 'Actiones',
-      // width: 110,
-      // renderCell: (params) => {
-      //   return (
-      //     <Stack>
-      //       <IconButton aria-label="delete" color="error">
-      //         <DeleteIcon />
-      //       </IconButton>
-      //     </Stack>
-
-
-      //   );
-      // }
-    },
   ];
 
   const url = 'https://mobile-phones2.p.rapidapi.com/48/phones';
@@ -117,7 +98,7 @@ try {
 }
 
 const CustomImageColumn = ({ value }) => {
-
+  console.log("VALUE: ", value)
   return (
     <>
       {
@@ -126,9 +107,10 @@ const CustomImageColumn = ({ value }) => {
             <Grid item >
               <Image
                 src={value}
+                alt="Image"
                 width={50}
                 height={50}
-                alt={"ALT"}
+                unoptimized
               />
             </Grid>
           </Grid >
@@ -140,10 +122,10 @@ const CustomImageColumn = ({ value }) => {
                 <Grid item key={index}>
                   <Image
                     src={image}
+                    alt={`Image-${index + 1}`}
                     width={50}
                     height={50}
-                    alt={`Image ${index + 1}`}
-                    key={`image-${index + 1}`}
+                    unoptimized
                   />
                 </Grid>
               ))
@@ -173,7 +155,7 @@ const ProductsTable = ({ title, data = [] }) => {
       field: 'images',
       headerName: 'Imagenes',
       width: 200,
-      renderCell: (params) => (<CustomImageColumn value={params.value} />),
+      renderCell: (params, index) => (<CustomImageColumn value={params.value} key={index} />),
     },
   ];
 
@@ -359,6 +341,13 @@ const Dashboard = () => {
         >
           Cerrar Sesion
         </Button>
+        <Image
+        
+          src={"https://portaty-storage165121-dev.s3.us-east-1.amazonaws.com/public/app/images//brands/SAMSUNG.image"}
+          alt={"EJELE"}
+          width={50}
+          height={50}
+        />
       </div>
     </div>
   );

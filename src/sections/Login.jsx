@@ -84,6 +84,12 @@ const Login = () => {
     <div className="container section">
       <div className={styles.content}>
         <div className={styles.title}>
+          <Image
+            src={"https://portaty-storage165121-dev.s3.amazonaws.com/public/app/images/brands/SAMSUNG.image"}
+            alt={"EJELE"}
+            width={50}
+            height={50}
+          />
           <Image src={login.image} alt="" />
           <h2>- Panel Administrativo</h2>
         </div>
