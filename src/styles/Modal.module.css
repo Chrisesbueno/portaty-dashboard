@@ -7,7 +7,7 @@
 .content {
   padding: 2rem;
   background-color: var(--white);
-  height: 450px;
+  height: 550px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -53,4 +53,20 @@
 }
 .time input {
   width: 310px;
+}
+.legendTitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.legendInfo {
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 5px; 
+}
+.legendValors {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 10px 0px;
+
 }
