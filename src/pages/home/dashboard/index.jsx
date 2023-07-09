@@ -10,7 +10,7 @@ import ModalCategories from "@/components/ModalCategories";
 import ModalBrands from "@/components/ModalBrands";
 import ModalProducts from "@/components/ModalProducts";
 import { TextField, Grid } from "@mui/material";
-import { read, utils } from "xlsx";
+// import { read, utils } from "xlsx";
 
 // amplify
 import { Auth, API, graphqlOperation } from "aws-amplify";
@@ -84,21 +84,27 @@ const CustomImageColumn = ({ value }) => {
   return (
     <>
       {typeof value === "string" ? (
-        <Grid container justifyContent="start" spacing={1}>
-          <Grid item>
-            <Image src={value} alt="Image" width={50} height={50} unoptimized />
+        <Grid container justifyContent="start" spacing={2}>
+          <Grid item >
+            <img
+              src={value}
+              alt={`Image`}
+              height={"auto"}
+              width={"auto"}
+              style={{ maxHeight: 50, maxWidth: 100, objectFit: "contain" }}
+            />
           </Grid>
         </Grid>
       ) : (
         <Grid container justifyContent="start" spacing={1}>
           {value.map((image, index) => (
             <Grid item key={index}>
-              <Image
-                src={image}
-                alt={`Image-${index + 1}`}
-                width={50}
-                height={50}
-                unoptimized
+              <img
+                src={value}
+                alt={`Image`}
+                height={"auto"}
+                width={"auto"}
+                style={{ maxHeight: 50, maxWidth: 100, objectFit: "contain" }}
               />
             </Grid>
           ))}
@@ -182,25 +188,7 @@ const Dashboard = () => {
     setProducts(dataProducts);
   };
 
-  /* Carga Masiva */
-  const [upload, setUpload] = useState([]);
-
-  const uploadExcel = (data) => {
-    const excel = data.target.files[0];
-    console.log(excel)
-    fetchExcel(excel)
-  };
-
-  const fetchExcel = async (file) => {
-    const excel = await file.arrayBuffer();
-    const workbook = read(excel);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = utils.sheet_to_json(worksheet);
-    console.log(data);
-    setUpload(data);
-  };
-
-  /*  */
+ 
 
   useEffect(() => {
     if (!openCategories && !openBrands && !openProducts) fecthShop();
@@ -245,7 +233,7 @@ const Dashboard = () => {
             >
               Agg Producto
             </Button>
-            <input type="file" name="Carga Masiva" id="cargamasiva" accept=".xls,.xlsx" onChange={(e) => uploadExcel(e)}/>
+            {/* <input type="file" name="Carga Masiva" id="cargamasiva" accept=".xls,.xlsx" onChange={(e) => uploadExcel(e)}/> */}
             <ModalCategories
               open={openCategories}
               close={() => setOpenCategories(false)}
@@ -270,14 +258,6 @@ const Dashboard = () => {
         <Button variant="contained" size="large" onClick={() => Auth.signOut()}>
           Cerrar Sesion
         </Button>
-        <Image
-          src={
-            "https://portaty-storage165121-dev.s3.us-east-1.amazonaws.com/public/app/images//brands/SAMSUNG.image"
-          }
-          alt={"EJELE"}
-          width={50}
-          height={50}
-        />
       </div>
     </div>
   );
